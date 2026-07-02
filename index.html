@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест API - FastAPI Auth</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #007bff;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            background: #fafafa;
+            cursor: pointer;
+        }
+        
+        input[type="file"]:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+        
+        .token-display {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            display: none;
+        }
+        
+        .token-display.show {
+            display: block;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .api-url {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+        
+        .api-url label {
+            margin-bottom: 5px;
+        }
+        
+        .api-url input {
+            font-family: monospace;
+        }
+        
+        .preview-container {
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .preview-container.show {
+            display: block;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .upload-progress {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            color: #856404;
+            display: none;
+        }
+        
+        .upload-progress.show {
+            display: block;
+        }
+        
+        .response-data {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Тест FastAPI Authentication</h1>
+    
+    <div class="api-url">
+        <label for="apiBase">Базовый URL API:</label>
+        <input type="text" id="apiBase" value="http://127.0.0.1:8000" placeholder="http://127.0.0.1:8000">
+    </div>
+
+    <div class="container">
+        <!-- Регистрация -->
+        <div class="card">
+            <h2>📝 Регистрация</h2>
+            <div class="form-group">
+                <label for="regEmail">Email:</label>
+                <input type="email" id="regEmail" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Пароль:</label>
+                <input type="password" id="regPassword" placeholder="Введите пароль">
+            </div>
+            <button onclick="register()">Зарегистрироваться</button>
+            <div id="regResult" class="result"></div>
+        </div>
+
+        <!-- Вход -->
+        <div class="card">
+            <h2>🔑 Вход</h2>
+            <div class="form-group">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Пароль:</label>
+                <input type="password" id="loginPassword" placeholder="Введите пароль">
+            </div>
+            <button onclick="login()">Войти</button>
+            <div id="loginResult" class="result"></div>
+            <div id="tokenDisplay" class="token-display"></div>
+        </div>
+
+        <!-- Проверка токена -->
+        <div class="card full-width">
+            <h2>👤 Проверка авторизации (/users/me)</h2>
+            <button onclick="checkAuth()" id="checkBtn" disabled>Проверить токен</button>
+            <div id="authResult" class="result"></div>
+        </div>
+
+        <!-- Загрузка фото -->
+        <div class="card full-width">
+            <h2>📸 Загрузка фото (/point)</h2>
+            <div class="form-group">
+                <label for="photoFile">Выберите фото:</label>
+                <input type="file" id="photoFile" accept="image/*" onchange="previewImage()">
+            </div>
+            
+            <div id="previewContainer" class="preview-container">
+                <img id="imagePreview" class="preview-image" alt="Preview">
+                <div id="fileInfo" class="file-info"></div>
+            </div>
+            
+            <button onclick="uploadPhoto()" id="uploadBtn" disabled>Загрузить фото</button>
+            
+            <div id="uploadProgress" class="upload-progress">
+                🔄 Загрузка...
+            </div>
+            
+            <div id="uploadResult" class="result"></div>
+            <div id="uploadResponse" class="response-data" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentToken = null;
+        let selectedFile = null;
+
+        function getApiBase() {
+            return document.getElementById('apiBase').value.trim();
+        }
+
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'result ' + (isError ? 'error' : 'success');
+        }
+
+        async function register() {
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const apiBase = getApiBase();
+
+            if (!email || !password) {
+                showResult('regResult', '❌ Заполните все поля', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBase}/user/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('regResult', `✅ Успешно! Пользователь создан:\nEmail: ${data.email}\nID: ${data.id}`);
+                } else {
+                    showResult('regResult', `❌ Ошибка: ${data.detail || 'Неизвестная ошибка'}`, true);
+                }
+            } catch (error) {
+                showResult('regResult', `❌ Ошибка сети: ${error.message}`, true);
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const apiBase = getApiBase();
+
+            if (!username || !password) {
+                showResult('loginResult', '❌ Заполните все поля', true);
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                const response = await fetch(`${apiBase}/user/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentToken = data.access_token;
+                    showResult('loginResult', '✅ Успешный вход! Токен получен.');
+                    
+                    const tokenDisplay = document.getElementById('tokenDisplay');
+                    tokenDisplay.textContent = `Токен: ${currentToken}`;
+                    tokenDisplay.className = 'token-display show';
+                    
+                    document.getElementById('checkBtn').disabled = false;
+                    document.getElementById('uploadBtn').disabled = false;
+                } else {
+                    showResult('loginResult', `❌ Ошибка: ${data.detail || 'Неверные учетные данные'}`, true);
+                }
+            } catch (error) {
+                showResult('loginResult', `❌ Ошибка сети: ${error.message}`, true);
+            }
+        }
+
+        async function checkAuth() {
+            if (!currentToken) {
+                showResult('authResult', '❌ Сначала войдите в систему', true);
+                return;
+            }
+
+            const apiBase = getApiBase();
+
+            try {
+                const response = await fetch(`${apiBase}/user/users/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('authResult', `✅ Авторизация успешна!\nEmail: ${data.email}\nID: ${data.id}`);
+                } else {
+                    showResult('authResult', `❌ Ошибка: ${data.detail || 'Токен недействителен'}`, true);
+                }
+            } catch (error) {
+                showResult('authResult', `❌ Ошибка сети: ${error.message}`, true);
+            }
+        }
+
+        // Предпросмотр изображения
+        function previewImage() {
+            const fileInput = document.getElementById('photoFile');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                selectedFile = file;
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    const container = document.getElementById('previewContainer');
+                    const info = document.getElementById('fileInfo');
+                    
+                    preview.src = e.target.result;
+                    container.className = 'preview-container show';
+                    
+                    const fileSize = (file.size / 1024).toFixed(2);
+                    info.innerHTML = `
+                        <strong>Имя файла:</strong> ${file.name}<br>
+                        <strong>Размер:</strong> ${fileSize} KB<br>
+                        <strong>Тип:</strong> ${file.type}
+                    `;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Загрузка фото
+        async function uploadPhoto() {
+            if (!selectedFile) {
+                showResult('uploadResult', '❌ Выберите файл для загрузки', true);
+                return;
+            }
+
+            if (!currentToken) {
+                showResult('uploadResult', '❌ Сначала войдите в систему', true);
+                return;
+            }
+
+            const apiBase = getApiBase();
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const progressDiv = document.getElementById('uploadProgress');
+            const responseDiv = document.getElementById('uploadResponse');
+            
+            try {
+                progressDiv.className = 'upload-progress show';
+                showResult('uploadResult', '');
+                responseDiv.style.display = 'none';
+
+                const response = await fetch(`${apiBase}/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: formData
+                });
+
+                progressDiv.className = 'upload-progress';
+
+                const responseData = await response.json();
+
+                if (response.ok) {
+                    showResult('uploadResult', '✅ Фото успешно загружено!');
+                    
+                    // Показываем ответ сервера
+                    responseDiv.textContent = 'Ответ сервера:\n' + JSON.stringify(responseData, null, 2);
+                    responseDiv.style.display = 'block';
+                    
+                    // Очищаем выбор файла
+                    document.getElementById('photoFile').value = '';
+                    document.getElementById('previewContainer').className = 'preview-container';
+                    selectedFile = null;
+                } else {
+                    showResult('uploadResult', `❌ Ошибка загрузки: ${responseData.detail || 'Неизвестная ошибка'}`, true);
+                    responseDiv.textContent = 'Ответ сервера:\n' + JSON.stringify(responseData, null, 2);
+                    responseDiv.style.display = 'block';
+                }
+            } catch (error) {
+                progressDiv.className = 'upload-progress';
+                showResult('uploadResult', `❌ Ошибка сети: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>
