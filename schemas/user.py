@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
 
 class UserCreate(UserBase):
     password: str
@@ -16,4 +16,4 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    email: str | None = None
+    email: EmailStr | None = None
