@@ -1,0 +1,19 @@
+[
+  {
+    "timestamp": "2026-07-05T15:44:03.359291",
+    "status": "START",
+    "url": "https://tyumen.cian.ru/sale/flat/324808802/?context=4.vUW0Fq0bSv8.S2FisduNAE3jVtFf87KQtBGSzmTsK6vjYqekZBomUvYyr5O7F7GEl4Op1U2uj33E-IYaQZYafCnHdQ&mlSearchSessionGuid=e3236503a2cb2a61752cc3e429cef6a9",
+    "message": "Начало обработки"
+  },
+  {
+    "timestamp": "2026-07-05T15:44:49.230442",
+    "status": "SUCCESS",
+    "url": "https://tyumen.cian.ru/sale/flat/324808802/?context=4.vUW0Fq0bSv8.S2FisduNAE3jVtFf87KQtBGSzmTsK6vjYqekZBomUvYyr5O7F7GEl4Op1U2uj33E-IYaQZYafCnHdQ&mlSearchSessionGuid=e3236503a2cb2a61752cc3e429cef6a9",
+    "message": "Квартира добавлена с ID: 62e7a9ed-34ef-427e-a503-261a12ead45f",
+    "data": {
+      "apartment_id": "62e7a9ed-34ef-427e-a503-261a12ead45f",
+      "images_count": 10,
+      "prompt_length": 4288
+    }
+  }
+]
