@@ -234,15 +234,15 @@ async function performLogin(email, password, errorEl, btn) {
     if (!btn) btn = document.getElementById('loginBtn');
 
     try {
+        const formData = new URLSearchParams();
+        formData.append('username', email);
+        formData.append('password', password);
         const response = await fetch(`${API_BASE_URL}/user/token`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify({
-                username: email,
-                password: password
-            })
+            body: formData
         });
 
         if (response.ok) {

@@ -1,4 +1,3 @@
-# auth.py
 import bcrypt
 import os # Импортируем bcrypt напрямую вместо passlib
 from dotenv import load_dotenv
@@ -26,7 +25,6 @@ def get_password_hash(password: str) -> str:
     # Декодируем байты обратно в строку для сохранения в БД
     return hashed.decode('utf-8')
 
-# --- Функция создания JWT токена остается без изменений ---
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     if expires_delta:

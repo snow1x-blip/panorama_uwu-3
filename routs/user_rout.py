@@ -10,7 +10,7 @@ from models import user as models
 import auth
 
 
-Base.metadata.create_all(bind=engine)
+
 
 router = APIRouter(
     prefix="/user",
