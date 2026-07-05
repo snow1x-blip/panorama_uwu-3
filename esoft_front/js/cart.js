@@ -1,6 +1,4 @@
-// cart.js - Логика страницы корзины подборок
-
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://127.0.0.1:8000';
 
 let rowCount = 0;
 
@@ -32,7 +30,7 @@ addBtn.addEventListener('click', async () => {
     btnSpinner.style.display = 'inline-block';
 
     try {
-        const response = await fetch(`${API_URL}/parse`, {
+        const response = await fetch(`${API_URL}/process`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url: url })
@@ -43,8 +41,15 @@ addBtn.addEventListener('click', async () => {
             throw new Error(err.detail || 'Ошибка парсинга');
         }
 
-        const data = await response.json();
-        addRowToTable(data);
+        const result = await response.json();
+        
+        // Извлекаем данные из правильной структуры
+        if (result.status === 'success' && result.data && result.data.apartment_card) {
+            const cardData = result.data.apartment_card;
+            addRowToTable(cardData);
+        } else {
+            throw new Error('Неверная структура ответа от сервера');
+        }
         
         // Clear Input
         linkInput.value = '';
@@ -68,9 +73,9 @@ function addRowToTable(data) {
     rowCount++;
     countInfo.textContent = `1–${rowCount} из ${rowCount}`;
 
-    const date = new Date().toLocaleString('ru-RU');
-    const imgSrc = data.images && data.images.length > 0 ? data.images[0] : 'https://placehold.co/120x90/e0e0e0/999999?text=Room';
-    const shortId = data.id.substring(0, 8).toUpperCase();
+    const date = new Date(data.created_at).toLocaleString('ru-RU');
+    const imgSrc = data.images && data.images.length > 0 ? data.images[0] : 'https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fhoff.ru%2Fblog%2Fdizayn-kvartiry-v-sovremennom-stile%2F&ved=0CBYQjRxqFwoTCODv5c3Hu5UDFQAAAAAdAAAAABAF&opi=89978449';
+    const shortId = data.id.toUpperCase().substring(0, 8);
 
     const rowHtml = `
         <tr class="new-row">
