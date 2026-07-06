@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Union
 
 JSON_DIR = Path("parser/json")
-IMAGE_DIR = Path("parser/image")
+IMAGE_DIR = Path("esoft_front/static/img")
 
 
 def ensure_dirs_exist():

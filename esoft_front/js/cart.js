@@ -19,10 +19,74 @@ const aiVitrina = new AiVitrina({
     triggerSelector: '#aiVitrinaTrigger'
 });
 
+// Инициализация модального окна авторизации
+const authModal = new AuthModal({
+    apiUrl: API_URL,
+    triggerSelector: '#authTrigger',
+    avatarSelector: '#profileAvatar',
+    onLogin: async (data) => {
+        console.log('Пользователь авторизован');
+        await loadUserApartments(); // Загружаем карточки после входа
+    },
+    onLogout: () => {
+        console.log('Пользователь вышел');
+        clearTable();
+    }
+});
+
+// Загрузка карточек пользователя из БД
+async function loadUserApartments() {
+    if (!authModal.isAuthenticated()) return;
+    
+    try {
+        const token = authModal.getToken();
+        const response = await fetch(`${API_URL}/apartments/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки карточек');
+        }
+        
+        const apartments = await response.json();
+        
+        // Очищаем таблицу и загружаем карточки
+        clearTable();
+        
+        if (apartments.length > 0) {
+            apartments.forEach(apt => {
+                addRowToTable(apt, false); // false - не сохранять в БД (уже сохранено)
+            });
+        }
+        
+    } catch (error) {
+        console.error('Ошибка загрузки карточек:', error);
+    }
+}
+
+// Очистка таблицы
+function clearTable() {
+    tableBody.innerHTML = '';
+    rowCount = 0;
+    emptyState.style.display = 'block';
+    mainTable.style.display = 'none';
+    pagination.style.display = 'none';
+    countInfo.textContent = '';
+}
+
 // Добавление объявления
 addBtn.addEventListener('click', async () => {
     const url = linkInput.value.trim();
     if (!url) return;
+
+    // Проверка авторизации
+    if (!authModal.isAuthenticated()) {
+        alert('Пожалуйста, авторизуйтесь для добавления объявлений');
+        authModal.show();
+        return;
+    }
 
     // UI Loading State
     addBtn.disabled = true;
@@ -30,29 +94,64 @@ addBtn.addEventListener('click', async () => {
     btnSpinner.style.display = 'inline-block';
 
     try {
-        const response = await fetch(`${API_URL}/process`, {
+        const token = authModal.getToken();
+        
+        // Парсинг URL
+        const parseResponse = await fetch(`${API_URL}/process`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ url: url })
         });
 
-        if (!response.ok) {
-            const err = await response.json();
+        if (!parseResponse.ok) {
+            const err = await parseResponse.json();
             throw new Error(err.detail || 'Ошибка парсинга');
         }
 
-        const result = await response.json();
+        const result = await parseResponse.json();
         
-        // Извлекаем данные из правильной структуры
         if (result.status === 'success' && result.data && result.data.apartment_card) {
             const cardData = result.data.apartment_card;
-            addRowToTable(cardData);
+            
+            // Сохраняем в БД
+            const saveResponse = await fetch(`${API_URL}/apartments/`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: cardData.title,
+                    price: cardData.price,
+                    price_per_sqm: cardData.price_per_sqm,
+                    address: cardData.address,
+                    rooms: cardData.rooms,
+                    floor: cardData.floor,
+                    area: cardData.area,
+                    description: cardData.description,
+                    images: cardData.images,
+                    source: cardData.source,
+                    url: cardData.url
+                })
+            });
+            
+            if (!saveResponse.ok) {
+                throw new Error('Ошибка сохранения карточки');
+            }
+            
+            const savedApartment = await saveResponse.json();
+            
+            // Добавляем в таблицу
+            addRowToTable(savedApartment, false);
+            
+            // Clear Input
+            linkInput.value = '';
         } else {
             throw new Error('Неверная структура ответа от сервера');
         }
-        
-        // Clear Input
-        linkInput.value = '';
         
     } catch (error) {
         alert('Ошибка: ' + error.message);
@@ -64,7 +163,7 @@ addBtn.addEventListener('click', async () => {
 });
 
 // Добавление строки в таблицу
-function addRowToTable(data) {
+function addRowToTable(data, saveToDB = false) {
     // Hide empty state, show table
     emptyState.style.display = 'none';
     mainTable.style.display = 'table';
@@ -74,20 +173,20 @@ function addRowToTable(data) {
     countInfo.textContent = `1–${rowCount} из ${rowCount}`;
 
     const date = new Date(data.created_at).toLocaleString('ru-RU');
-    const imgSrc = data.images && data.images.length > 0 ? data.images[0] : 'https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fhoff.ru%2Fblog%2Fdizayn-kvartiry-v-sovremennom-stile%2F&ved=0CBYQjRxqFwoTCODv5c3Hu5UDFQAAAAAdAAAAABAF&opi=89978449';
+    const imgSrc = data.images && data.images.length > 0 ? data.images[0] : 'https://luxorta.ru/uploads/posts/2020-11/1604676985_remont-kvartiry-kachestvenno.jpg';
     const shortId = data.id.toUpperCase().substring(0, 8);
 
     const rowHtml = `
-        <tr class="new-row">
+        <tr class="new-row" data-apartment-id="${data.id}">
             <td><input type="checkbox" checked></td>
             <td>
                 <div class="object">
-                    <div class="img-box">
+                    <div class="img-box" data-images='${JSON.stringify(data.images || [])}' data-current-index="0">
                         <img src="${imgSrc}" alt="${data.title}">
                         <span class="img-count">1/${data.images ? data.images.length : 0}</span>
                         <div class="arrows">
-                            <div class="arrow">‹</div>
-                            <div class="arrow">›</div>
+                            <div class="arrow prev-arrow">‹</div>
+                            <div class="arrow next-arrow">›</div>
                         </div>
                     </div>
                     <div class="details">
@@ -102,7 +201,7 @@ function addRowToTable(data) {
                         <div class="district">${data.address}</div>
                         <span class="score">A (95%)</span>
                         <div class="read">Читать описание</div>
-                        <button class="del-btn" onclick="this.closest('tr').remove()">Удалить</button>
+                        <button class="del-btn" onclick="deleteApartment('${data.id}', this)">Удалить</button>
                         <div class="sources">
                             <div class="src" style="background:#4CAF50" title="Avito"></div>
                             <div class="src" style="background:#F44336" title="ЦИАН"></div>
@@ -165,6 +264,79 @@ function addRowToTable(data) {
 
     // Insert new row at the top
     tableBody.insertAdjacentHTML('afterbegin', rowHtml);
+    
+    // Инициализация обработчиков для новой строки
+    const newRow = tableBody.firstElementChild;
+    initImageSlider(newRow);
+}
+
+// Удаление квартиры
+async function deleteApartment(apartmentId, button) {
+    if (!confirm('Вы уверены, что хотите удалить эту карточку?')) return;
+    
+    try {
+        const token = authModal.getToken();
+        const response = await fetch(`${API_URL}/apartments/${apartmentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка удаления');
+        }
+        
+        // Удаляем строку из таблицы
+        const row = button.closest('tr');
+        row.remove();
+        rowCount--;
+        
+        // Обновляем счетчик
+        if (rowCount === 0) {
+            clearTable();
+        } else {
+            countInfo.textContent = `1–${rowCount} из ${rowCount}`;
+        }
+        
+    } catch (error) {
+        alert('Ошибка: ' + error.message);
+    }
+}
+
+// Инициализация слайдера изображений
+function initImageSlider(row) {
+    const imgBox = row.querySelector('.img-box');
+    const img = imgBox.querySelector('img');
+    const counter = imgBox.querySelector('.img-count');
+    const prevArrow = imgBox.querySelector('.prev-arrow');
+    const nextArrow = imgBox.querySelector('.next-arrow');
+    
+    const images = JSON.parse(imgBox.dataset.images);
+    let currentIndex = 0;
+    
+    if (images.length === 0) {
+        prevArrow.style.display = 'none';
+        nextArrow.style.display = 'none';
+        return;
+    }
+    
+    function updateImage() {
+        img.src = images[currentIndex];
+        counter.textContent = `${currentIndex + 1}/${images.length}`;
+    }
+    
+    prevArrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        updateImage();
+    });
+    
+    nextArrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentIndex = (currentIndex + 1) % images.length;
+        updateImage();
+    });
 }
 
 // Check all logic
@@ -173,3 +345,8 @@ checkAll.addEventListener('change', function() {
         cb.checked = this.checked;
     });
 });
+
+// Загружаем карточки при старте, если пользователь авторизован
+if (authModal.isAuthenticated()) {
+    loadUserApartments();
+}

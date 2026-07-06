@@ -73,7 +73,7 @@ async def extract_and_download_images(page, apartment_id: str) -> list:
             save_path = IMAGE_DIR / filename
 
             if await download_image(img_url, save_path):
-                downloaded_paths.append(f"parser/image/{filename}")
+                downloaded_paths.append(f"static/img/{filename}")
 
         return downloaded_paths
     except Exception as e:
@@ -222,13 +222,8 @@ def extract_apartment_data(page_text: str, extra_search: str) -> dict:
 
 
 def determine_source(url: str) -> str:
-    if "avito.ru" in url:
-        return "avito"
-    elif "cian.ru" in url:
-        return "cian"
-    elif "domclick.ru" in url:
-        return "domclick"
-    return "unknown"
+    result = url.split(".")
+    return result[1]
 
 
 def generate_presentation_prompt(apartment_data: dict, prompt_template: str) -> str:
