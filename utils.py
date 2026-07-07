@@ -1,4 +1,7 @@
 import json
+import socket
+import ipaddress
+from urllib.parse import urlparse
 from pathlib import Path
 from datetime import datetime
 from typing import Union
@@ -6,10 +9,63 @@ from typing import Union
 JSON_DIR = Path("parser/json")
 IMAGE_DIR = Path("esoft_front/static/img")
 
+# Домены объявлений, которые разрешено парсить
+ALLOWED_DOMAINS = ["avito.ru", "cian.ru", "domofond.ru", "etagi.com"]
+
 
 def ensure_dirs_exist():
-    JSON_DIR.mkdir(exist_ok=True)
-    IMAGE_DIR.mkdir(exist_ok=True)
+    JSON_DIR.mkdir(exist_ok=True, parents=True)
+    IMAGE_DIR.mkdir(exist_ok=True, parents=True)
+
+
+def validate_apartment_url(url: str) -> None:
+    """
+    Проверяет, что ссылка ведет на разрешенный домен объявлений
+    и не указывает на внутренние/приватные адреса (защита от SSRF).
+    Бросает ValueError с понятным сообщением при любой проблеме.
+    """
+    parsed = urlparse(url)
+
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("URL должен начинаться с http:// или https://")
+
+    hostname = parsed.hostname
+    if not hostname:
+        raise ValueError("Не удалось определить домен ссылки")
+
+    hostname_lower = hostname.lower()
+    is_allowed = any(
+        hostname_lower == domain or hostname_lower.endswith(f".{domain}")
+        for domain in ALLOWED_DOMAINS
+    )
+    if not is_allowed:
+        raise ValueError(
+            f"Поддерживаются только сайты: {', '.join(ALLOWED_DOMAINS)}"
+        )
+
+    # SSRF-защита: не даем сходить на localhost / приватные сети,
+    # даже если злоумышленник подделает домен через DNS rebinding
+    try:
+        resolved = socket.getaddrinfo(hostname, None)
+    except socket.gaierror:
+        raise ValueError("Не удалось разрешить домен ссылки")
+
+    for entry in resolved:
+        ip_str = entry[4][0]
+        try:
+            ip_obj = ipaddress.ip_address(ip_str)
+        except ValueError:
+            continue
+        if (
+            ip_obj.is_private
+            or ip_obj.is_loopback
+            or ip_obj.is_link_local
+            or ip_obj.is_multicast
+            or ip_obj.is_reserved
+            or ip_obj.is_unspecified
+        ):
+            raise ValueError("Ссылка ведет на недопустимый адрес")
+
 
 
 def log_event(status: str, message: str, url: str = "", data: dict = None):

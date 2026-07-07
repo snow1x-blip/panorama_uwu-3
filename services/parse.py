@@ -16,7 +16,7 @@ from utils import (
 import os
 from dotenv import load_dotenv
 load_dotenv()
-API_KEY = "sk-aitunnel-W4TLRAx2l0WknentbEYNsXSLGpkRv8jG"
+API_KEY = os.environ.get("API_KEY")
 
 
 def validate_input_data():

@@ -7,9 +7,11 @@ from routs.pdf_rout import router as pdf_router
 from routs.link_rout import router as link_router
 from routs.rooms import router as rooms_router
 from database import Base, engine
+from utils import ensure_dirs_exist
 
 
 Base.metadata.create_all(bind=engine)
+ensure_dirs_exist()
 
 app = FastAPI()
 app.add_middleware(

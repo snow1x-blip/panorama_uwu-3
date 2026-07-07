@@ -112,46 +112,21 @@ addBtn.addEventListener('click', async () => {
         }
 
         const result = await parseResponse.json();
-        
+
+        // /process теперь сразу сохраняет карточку в БД и возвращает
+        // уже сохраненный объект — второй запрос на /apartments/ не нужен
         if (result.status === 'success' && result.data && result.data.apartment_card) {
-            const cardData = result.data.apartment_card;
-            
-            // Сохраняем в БД
-            const saveResponse = await fetch(`${API_URL}/apartments/`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    title: cardData.title,
-                    price: cardData.price,
-                    price_per_sqm: cardData.price_per_sqm,
-                    address: cardData.address,
-                    rooms: cardData.rooms,
-                    floor: cardData.floor,
-                    area: cardData.area,
-                    description: cardData.description,
-                    images: cardData.images,
-                    source: cardData.source,
-                    url: cardData.url
-                })
-            });
-            
-            if (!saveResponse.ok) {
-                throw new Error('Ошибка сохранения карточки');
-            }
-            
-            const savedApartment = await saveResponse.json();
-            
+            const savedApartment = result.data.apartment_card;
+
             // Добавляем в таблицу
             addRowToTable(savedApartment, false);
-            
+
             // Clear Input
             linkInput.value = '';
         } else {
             throw new Error('Неверная структура ответа от сервера');
         }
+
         
     } catch (error) {
         alert('Ошибка: ' + error.message);
@@ -337,16 +312,4 @@ function initImageSlider(row) {
         currentIndex = (currentIndex + 1) % images.length;
         updateImage();
     });
-}
-
-// Check all logic
-checkAll.addEventListener('change', function() {
-    document.querySelectorAll('#tableBody input[type="checkbox"]').forEach(cb => {
-        cb.checked = this.checked;
-    });
-});
-
-// Загружаем карточки при старте, если пользователь авторизован
-if (authModal.isAuthenticated()) {
-    loadUserApartments();
 }
