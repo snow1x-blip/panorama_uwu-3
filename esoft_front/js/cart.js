@@ -34,6 +34,10 @@ const authModal = new AuthModal({
     }
 });
 
+// После обновления страницы AuthModal восстанавливает токен из localStorage,
+// но событие onLogin уже не происходит. Поэтому грузим сохраненные карточки явно.
+loadUserApartments();
+
 // Загрузка карточек пользователя из БД
 async function loadUserApartments() {
     if (!authModal.isAuthenticated()) return;
@@ -147,9 +151,10 @@ function addRowToTable(data, saveToDB = false) {
     rowCount++;
     countInfo.textContent = `1–${rowCount} из ${rowCount}`;
 
-    const date = new Date(data.created_at).toLocaleString('ru-RU');
+    const date = data.created_at ? new Date(data.created_at).toLocaleString('ru-RU') : '—';
     const imgSrc = data.images && data.images.length > 0 ? data.images[0] : 'https://luxorta.ru/uploads/posts/2020-11/1604676985_remont-kvartiry-kachestvenno.jpg';
     const shortId = data.id.toUpperCase().substring(0, 8);
+    const priceText = Number(data.price || 0).toLocaleString('ru-RU');
 
     const rowHtml = `
         <tr class="new-row" data-apartment-id="${data.id}">
@@ -185,7 +190,7 @@ function addRowToTable(data, saveToDB = false) {
                 </div>
             </td>
             <td>
-                <div style="font-weight:500">${data.price.toLocaleString('ru-RU')} руб.</div>
+                <div style="font-weight:500">${priceText} руб.</div>
                 <div style="color:#666;font-size:12px;margin-top:4px">
                     ${data.price_per_sqm ? data.price_per_sqm.toLocaleString('ru-RU') + ' руб./м²' : '—'}
                 </div>

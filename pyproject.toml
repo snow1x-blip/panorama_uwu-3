@@ -9,6 +9,7 @@ dependencies = [
     "duckduckgo-search>=8.1.1",
     "fastapi>=0.138.2",
     "loging>=0.0.1",
+    "openai>=2.44.0",
     "passlib>=1.7.4",
     "perplexityai>=0.39.0",
     "playwright>=1.61.0",

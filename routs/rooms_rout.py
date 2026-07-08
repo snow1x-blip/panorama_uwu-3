@@ -57,3 +57,23 @@ async def delete_apartment(
     db.delete(apartment)
     db.commit()
     return {"message": "Квартира удалена"}
+
+
+@router.get("/get_apartment/{apartment_id}")
+async def get_apartmen(
+    apartment_id: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    apartment = db.query(Apartment).filter(
+        Apartment.id == apartment_id,
+        Apartment.user_id == current_user.id
+    ).first()
+
+    if not apartment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Квартира не найдена"
+        )
+
+    return apartment
