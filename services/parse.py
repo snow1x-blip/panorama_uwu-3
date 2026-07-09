@@ -1,5 +1,6 @@
 import json
 import uuid
+import mimetypes
 import requests
 from pathlib import Path
 from datetime import datetime
@@ -47,41 +48,113 @@ async def download_image(url: str, save_path: Path) -> bool:
         return False
 
 
-async def extract_and_download_images(page, apartment_id: str) -> list:
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".svg")
+
+
+def _is_image_url(url: str) -> bool:
+    """Проверяет URL на то, что он может быть изображением."""
+    url_lower = url.lower()
+    if url_lower.startswith("data:"):
+        return False
+    path = url_lower.split("?")[0]
+    if path.endswith(IMAGE_EXTENSIONS):
+        return True
+    if any(seg in url_lower for seg in ("/image", "/photo", "/img/", "/ pictures", "/uploads/")):
+        return True
+    return False
+
+
+def create_apartment_dirs(apartment_id: str) -> Path:
+    """Создаёт директорию {apartment_id}/ для изображений."""
+    apartment_dir = IMAGE_DIR / apartment_id
+    apartment_dir.mkdir(parents=True, exist_ok=True)
+    return apartment_dir
+
+
+TRASH_URL_SEGMENTS = (
+    "/logo", "/icon", "/avatar", "/badge", "/sprite",
+    "/button", "/arrow", "/close", "/menu", "/search",
+    "/social", "/share", "/print", "/heart", "/like",
+    "/footer", "/header", "/banner", "/adv", "/advert",
+    "/pixel", "/track", "/analytics", "/counter", "/beacon",
+)
+
+
+def _is_junk_url(url: str) -> bool:
+    """Проверяет URL на признаки мусора (лого, иконки, трекеры)."""
+    url_lower = url.lower().split("?")[0]
+    if url_lower.endswith(".svg"):
+        return True
+    if url_lower.endswith((".gif",)):
+        return True
+    for seg in TRASH_URL_SEGMENTS:
+        if seg in url_lower:
+            return True
+    return False
+
+
+MIN_IMAGE_BYTES = 5_000
+MIN_IMAGE_DIM = 150
+
+
+def _is_junk_file(path: Path) -> bool:
+    """Проверяет скачанное изображение на признаки мусора по размеру и геометрии."""
+    if not path.exists():
+        return True
+    if path.stat().st_size < MIN_IMAGE_BYTES:
+        return True
+
     try:
-        images = await page.eval_on_selector_all(
-            'img[src*="http"]',
-            'elements => elements.map(el => el.src).filter(src => src && !src.includes("data:image") && !src.includes("icon") && !src.includes("logo") && !src.includes("avatar"))'
-        )
+        from PIL import Image
+        img = Image.open(path)
+        w, h = img.size
+        if w < MIN_IMAGE_DIM or h < MIN_IMAGE_DIM:
+            return True
+    except Exception:
+        pass
 
-        unique_images = []
-        seen = set()
-        for img_url in images:
-            if img_url not in seen and len(unique_images) < 10:
-                seen.add(img_url)
-                unique_images.append(img_url)
+    return False
 
-        downloaded_paths = []
-        for idx, img_url in enumerate(unique_images, 1):
-            ext = ".jpg"
-            if ".png" in img_url.lower():
-                ext = ".png"
-            elif ".webp" in img_url.lower():
-                ext = ".webp"
 
-            filename = f"{apartment_id}_{idx}{ext}"
-            save_path = IMAGE_DIR / filename
+async def _download_and_filter_images(
+    collected_urls: list[str],
+    apartment_id: str,
+    apartment_dir: Path,
+) -> list[str]:
+    """Скачивает изображения, фильтрует мусор, возвращает список URL для ответа."""
+    good_images: list[str] = []
+    seen: set[str] = set()
 
-            if await download_image(img_url, save_path):
-                downloaded_paths.append(f"static/img/{filename}")
+    for idx, img_url in enumerate(collected_urls, 1):
+        if img_url in seen:
+            continue
+        seen.add(img_url)
 
-        return downloaded_paths
-    except Exception as e:
-        log_event("ERROR", f"Ошибка при извлечении изображений: {e}")
-        return []
+        if _is_junk_url(img_url):
+            continue
+
+        url_lower = img_url.lower().split("?")[0]
+        ext = ".jpg"
+        if url_lower.endswith(".png"):
+            ext = ".png"
+        elif url_lower.endswith(".webp"):
+            ext = ".webp"
+
+        filename = f"{apartment_id}_{idx}{ext}"
+        save_path = apartment_dir / filename
+
+        if await download_image(img_url, save_path):
+            if _is_junk_file(save_path):
+                save_path.unlink(missing_ok=True)
+                continue
+            good_images.append(f"/static/img/{apartment_id}/{filename}")
+
+    return good_images
 
 
 async def get_page_content_and_images(url: str, apartment_id: str) -> tuple:
+    apartment_dir = create_apartment_dirs(apartment_id)
+
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
@@ -91,6 +164,21 @@ async def get_page_content_and_images(url: str, apartment_id: str) -> tuple:
                 locale="ru-RU"
             )
             page = await context.new_page()
+
+            await page.route("**/*", lambda route: route.continue_())
+            collected_image_urls: list[str] = []
+
+            def _check_response(response):
+                try:
+                    ct = response.headers.get("content-type", "")
+                    if ct.startswith("image/"):
+                        collected_image_urls.append(response.url)
+                    elif _is_image_url(response.url):
+                        collected_image_urls.append(response.url)
+                except Exception:
+                    pass
+
+            page.on("response", _check_response)
 
             await page.goto(url, timeout=90000, wait_until="domcontentloaded")
 
@@ -105,7 +193,12 @@ async def get_page_content_and_images(url: str, apartment_id: str) -> tuple:
             await page.wait_for_timeout(5000)
 
             text = await page.inner_text('body')
-            images = await extract_and_download_images(page, apartment_id)
+
+            log_event("INFO", f"Собрано URL изображений: {len(collected_image_urls)}", url)
+            images = await _download_and_filter_images(
+                collected_image_urls, apartment_id, apartment_dir
+            )
+            log_event("INFO", f"Оставлено изображений: {len(images)}", url)
 
             await browser.close()
 
@@ -131,11 +224,30 @@ async def get_page_content_and_images(url: str, apartment_id: str) -> tuple:
                         locale="ru-RU"
                     )
                     page = await context.new_page()
+
+                    collected_image_urls: list[str] = []
+
+                    def _check_response_retry(response):
+                        try:
+                            ct = response.headers.get("content-type", "")
+                            if ct.startswith("image/"):
+                                collected_image_urls.append(response.url)
+                            elif _is_image_url(response.url):
+                                collected_image_urls.append(response.url)
+                        except Exception:
+                            pass
+
+                    page.on("response", _check_response_retry)
+
                     await page.goto(url, timeout=30000, wait_until="commit")
                     await page.wait_for_timeout(8000)
 
                     text = await page.inner_text('body')
-                    images = await extract_and_download_images(page, apartment_id)
+
+                    images = await _download_and_filter_images(
+                        collected_image_urls, apartment_id, apartment_dir
+                    )
+
                     await browser.close()
 
                     if len(text) > 500:

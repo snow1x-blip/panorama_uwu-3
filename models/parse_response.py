@@ -24,7 +24,7 @@ class ApartmentCard(BaseModel):
     floor: Optional[str] = None
     area: Optional[float] = None
     description: Optional[str] = None
-    images: list[str] = []
+    images: list = []
     source: str
     url: str
     created_at: str

@@ -6,10 +6,10 @@ from database import Base
 
 class Apartment(Base):
     __tablename__ = "apartments"
-    
+
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    
+
     title = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
     price_per_sqm = Column(Integer, nullable=True)
@@ -18,15 +18,27 @@ class Apartment(Base):
     floor = Column(String, nullable=True)
     area = Column(Float, nullable=True)
     description = Column(String, nullable=True)
-    
+
     images = Column(JSON, default=list)
-    
+
     source = Column(String, nullable=True)
     url = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     user = relationship("User", back_populates="apartments")
-    
+
+    def _normalize_images(self) -> list:
+        """Приводит images к формату list для обратной совместимости."""
+        if isinstance(self.images, list):
+            return self.images
+        if isinstance(self.images, dict):
+            result = []
+            for v in self.images.values():
+                if isinstance(v, list):
+                    result.extend(v)
+            return result
+        return []
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -38,7 +50,7 @@ class Apartment(Base):
             "floor": self.floor,
             "area": self.area,
             "description": self.description,
-            "images": self.images,
+            "images": self._normalize_images(),
             "source": self.source,
             "url": self.url,
             "created_at": self.created_at.isoformat() if self.created_at else None

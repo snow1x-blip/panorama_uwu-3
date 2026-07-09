@@ -24,3 +24,5 @@ logs/
 *.log
 
 parser/image/
+
+esoft_front/static/

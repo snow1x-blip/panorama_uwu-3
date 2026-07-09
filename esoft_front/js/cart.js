@@ -152,7 +152,9 @@ function addRowToTable(data, saveToDB = false) {
     countInfo.textContent = `1–${rowCount} из ${rowCount}`;
 
     const date = data.created_at ? new Date(data.created_at).toLocaleString('ru-RU') : '—';
-    const imgSrc = data.images && data.images.length > 0 ? data.images[0] : 'https://luxorta.ru/uploads/posts/2020-11/1604676985_remont-kvartiry-kachestvenno.jpg';
+    const rawImages = Array.isArray(data.images) ? data.images : [];
+    const flatImages = rawImages.map(src => src.startsWith('/static') ? `${API_URL}${src}` : src);
+    const imgSrc = flatImages.length > 0 ? flatImages[0] : 'https://luxorta.ru/uploads/posts/2020-11/1604676985_remont-kvartiry-kachestvenno.jpg';
     const shortId = data.id.toUpperCase().substring(0, 8);
     const priceText = Number(data.price || 0).toLocaleString('ru-RU');
 
@@ -161,9 +163,9 @@ function addRowToTable(data, saveToDB = false) {
             <td><input type="checkbox" checked></td>
             <td>
                 <div class="object">
-                    <div class="img-box" data-images='${JSON.stringify(data.images || [])}' data-current-index="0">
+                    <div class="img-box" data-images='${JSON.stringify(flatImages)}' data-current-index="0">
                         <img src="${imgSrc}" alt="${data.title}">
-                        <span class="img-count">1/${data.images ? data.images.length : 0}</span>
+                        <span class="img-count">1/${flatImages.length}</span>
                         <div class="arrows">
                             <div class="arrow prev-arrow">‹</div>
                             <div class="arrow next-arrow">›</div>
