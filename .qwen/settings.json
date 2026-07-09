@@ -29,7 +29,9 @@
       "Bash(curl *)",
       "Bash(pkill *)",
       "Bash(lsof *)",
-      "Bash(xargs *)"
+      "Bash(xargs *)",
+      "Bash(docker exec *)",
+      "Bash(sudo *)"
     ]
   },
   "$version": 4
