@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = 'http://81.26.189.36:8000';
 
 let rowCount = 0;
 
