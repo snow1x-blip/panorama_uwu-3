@@ -1,0 +1,13 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+.env
+*.db
+.idea
+.vscode
+node_modules
+*.md
+parser/image
+esoft_front/static

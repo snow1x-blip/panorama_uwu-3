@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    container_name: panorama
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - app_data:/app/data
+      - ./parser/json:/app/parser/json
+      - ./esoft_front/static/img:/app/esoft_front/static/img
+    environment:
+      - DATABASE_URL=sqlite:///./data/users.db
+
+volumes:
+  app_data:
