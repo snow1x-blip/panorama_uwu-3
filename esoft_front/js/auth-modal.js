@@ -1,6 +1,6 @@
 class AuthModal {
     constructor(options = {}) {
-        this.apiUrl = options.apiUrl || 'http://127.0.0.1:8000';
+        this.apiUrl = options.apiUrl || '';
         this.triggerSelector = options.triggerSelector || '#authTrigger';
         this.avatarSelector = options.avatarSelector || '#profileAvatar';
         this.onLogin = options.onLogin || null;

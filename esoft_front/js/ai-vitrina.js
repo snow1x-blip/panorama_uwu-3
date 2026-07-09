@@ -740,7 +740,7 @@ class AiVitrina {
         form.style.display = 'none';
         loading.classList.add('active');
         
-        const API_BASE = 'http://127.0.0.1:8000';
+        const API_BASE = '';
         
         fetch(`${API_BASE}/ai_gen/presa`, {
             method: 'POST',
