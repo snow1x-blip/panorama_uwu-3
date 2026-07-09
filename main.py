@@ -28,6 +28,7 @@ app.add_middleware(
 
 STATIC_IMG_DIR = Path("esoft_front/static/img")
 STATIC_IMG_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/esoft_front", StaticFiles(directory="esoft_front"), name="esoft_front")
 app.mount("/static", StaticFiles(directory="esoft_front/static"), name="static")
 app.mount("/front", StaticFiles(directory="front"), name="front")
 
@@ -41,7 +42,7 @@ app.include_router(presa_router)
 
 @app.get("/")
 async def root():
-    return FileResponse("front/index.html")
+    return FileResponse("esoft_front/cart.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
