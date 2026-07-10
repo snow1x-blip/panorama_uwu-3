@@ -10,3 +10,4 @@ env/
 logs/
 *.log
 esoft_front/static/
+__pycache__/
