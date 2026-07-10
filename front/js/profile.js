@@ -39,7 +39,7 @@
 
         try {
             // ВАЖНО: Замените URL на адрес вашего бекенда, если он на другом порту (например, http://localhost:8000)
-            const apiUrl = `http://127.0.0.1:8000/files/${encodeURIComponent(userIdentifier)}`;
+            const apiUrl = `/files/${encodeURIComponent(userIdentifier)}`;
             const response = await fetch(apiUrl);
             
             if (response.status === 404) {
@@ -82,7 +82,7 @@
                     
                     try {
                         // Делаем запрос с заголовком авторизации
-                        const response = await fetch(`http://localhost:8000/download/${encodeURIComponent(fileName)}`, {
+                        const response = await fetch(`/download/${encodeURIComponent(fileName)}`, {
                             method: 'GET',
                             headers: {
                                 'Authorization': `Bearer ${token}`  // Или 'Token ' в зависимости от вашей схемы
