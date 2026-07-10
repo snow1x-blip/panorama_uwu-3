@@ -17,7 +17,12 @@ from utils import ensure_dirs_exist
 Base.metadata.create_all(bind=engine)
 ensure_dirs_exist()
 
-app = FastAPI()
+app = FastAPI(
+    title="burmalda",
+    docs_url=None,      
+    redoc_url=None,     
+    openapi_url=None 
+) 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
