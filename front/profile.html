@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль</title>
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">LOGO</div>
+        <div class="header-buttons">
+            <button class="header-btn" onclick="openModal('login')">войти</button>
+            <button class="header-btn" onclick="openModal('register')">регистрация</button>
+        </div>
+    </header>
+    <div class="carts-page">
+        <!-- SIDEBAR (white rounded card) -->
+        <aside class="carts-sidebar">
+            <nav class="carts-nav">
+                <!-- Active item — icon + bold -->
+                <a class="carts-nav-item active" href="index.html">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    Главная
+                </a>
+                <!-- Plain text, no icons -->
+                <a class="carts-nav-item no-icon" href="profile.html">Профиль</a>
+                <a class="carts-nav-item no-icon" href="pres_add.html">Новая квартира</a>
+                <a class="carts-nav-item no-icon" href="about.html">О нас</a>
+            </nav>
+            <button class="carts-logout-btn" onclick="logout()">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                выйти
+            </button>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="carts-main">
+
+            <!-- SEARCH (pill with magnifier icon baked-in, no border) -->
+            <div class="carts-search">
+                <input type="text" class="carts-search-input" placeholder="">
+            </div>
+
+            <!-- TITLE -->
+            <h1 class="carts-title">Профиль</h1>
+
+            <!-- PROFILE CARD: avatar + bordered info box, both inside one white card -->
+            <div class="carts-card">
+                <div class="profile-card-content">
+                    <div class="profile-avatar" id="profileAvatar"></div>
+                    <div class="profile-info">
+                        <!-- Header row: "Информация" left + "редактировать" pill right -->
+                        <div class="profile-info-header">
+                            <h2 class="profile-info-head">Информация</h2>
+                            <button class="profile-edit-btn">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                редактировать
+                            </button>
+                        </div>
+                        <!-- 3 columns; Имя column is constrained so long names wrap -->
+                        <div class="profile-info-fields">
+                            <div>
+                                <div class="profile-field-label">Email</div>
+                                <div class="profile-field-value" id="userEmail">ivanov@gmail.com</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRESENTATIONS CARD -->
+            <div class="carts-card">
+                <div class="presentations-head">
+                    <h2 class="presentations-title">Мои проекты</h2>
+                </div>
+                
+                <!-- Сетка для карточек PDF -->
+                <div id="pdfList" class="presentations-grid">
+                    <!-- Сюда JS будет добавлять карточки -->
+                </div>
+                <p id="pdfEmptyMessage" style="display: none; color: #9ca3af; font-size: 15px; text-align: center; padding: 20px 0;">
+                    У вас пока нет загруженных документов
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
