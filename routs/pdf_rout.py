@@ -36,3 +36,44 @@ async def get_pdf(pdf_user: str, db: Session = Depends(get_db)):
             })
 
     return files_info
+
+
+@router.get("/download/{filename}")
+async def download_pdf(
+    filename: str, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Эндпоинт для скачивания конкретного PDF файла.
+    Проверяет, что файл действительно принадлежит текущему пользователю.
+    """
+    # Ищем файл в БД по имени и пользователю (защита от скачивания чужих файлов)
+    # Примечание: если user_name в БД это email, используем current_user.email
+    user_identifier = current_user.email if hasattr(current_user, 'email') else current_user.username
+    
+    query = select(Pdf).where(
+        Pdf.user_name == user_identifier,
+        Pdf.path_to_pdf.like(f"%{filename}") # Ищем по вхождению имени файла в путь
+    )
+    result = db.execute(query)
+    doc = result.scalars().first()
+    
+    if not doc or not os.path.exists(doc.path_to_pdf):
+        raise HTTPException(status_code=404, detail="Файл не найден или у вас нет к нему доступа")
+        
+    # Отдаем файл браузеру
+    return FileResponse(
+        path=doc.path_to_pdf,
+        filename=filename,
+        media_type='application/pdf'
+    )
+
+
+@router.post("/upload/pdf/{filename}")
+def upload_pdf(
+    filename: str, 
+    db: Session = Depends(get_db), 
+    current_user: Session = Depends(get_current_user)
+):
+    pass
