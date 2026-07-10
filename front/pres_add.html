@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Новый проект</title>
-    <link rel="shortcut icon" href="photo/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="css/pres_add.css">
+    <link rel="shortcut icon" href="/front/photo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/front/css/style.css">
     <link rel="stylesheet" href="/front/css/pres_add.css">
 </head>
 <body>
     <header class="header">
-        <img class="svg-logo" src="photo/logo.svg">
+        <img class="svg-logo" src="/front/photo/logo.svg">
         <div class="header-buttons">
-            <button class="header-btn">войти</button>
-            <button class="header-btn">регистрация</button>
+            <button class="header-btn" onclick="openModal('login')">войти</button>
+            <button class="header-btn" onclick="openModal('register')">регистрация</button>
         </div>
     </header>
 
@@ -22,7 +22,7 @@
         <aside class="carts-sidebar">
             <nav class="carts-nav">
                 <!-- Active item — icon + bold -->
-                <a class="carts-nav-item active" href="index.html">
+                <a class="carts-nav-item active" href="/front/index.html">
                     <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
@@ -30,9 +30,9 @@
                     Главная
                 </a>
                 <!-- Plain text, no icons -->
-                <a class="carts-nav-item no-icon" href="profile.html">Профиль</a>
-                <a class="carts-nav-item no-icon" href="pres_add.html">Новая квартира</a>
-                <a class="carts-nav-item no-icon" href="about.html">О нас</a>
+                <a class="carts-nav-item no-icon" href="/profile">Профиль</a>
+                <a class="carts-nav-item no-icon" href="/create">Новая квартира</a>
+                <a class="carts-nav-item no-icon" href="/about">О нас</a>
             </nav>
             <button class="carts-logout-btn" onclick="logout()">
                 <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
@@ -213,7 +213,54 @@
             </div>
         </main>
     </div>
-    
+
+    <!-- ===== AUTH MODAL ===== -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-logo">LOGO</div>
+        <button class="close-modal" onclick="closeModal('authModal')">✕</button>
+
+        <div class="modal-card">
+            <div class="modal-tabs">
+                <button class="modal-tab active" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+                <button class="modal-tab" id="tabLogin" onclick="switchTab('login')">Вход</button>
+            </div>
+
+            <!-- Форма регистрации -->
+            <form class="register-form" id="registerForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">Электронная почта</label>
+                    <input type="email" class="form-input" id="regEmail" placeholder="Электронная почта">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="Пароль">
+                </div>
+                <p class="form-error" id="regError"></p>
+                <button type="submit" class="submit-btn" id="regBtn" onclick="handleRegister()">Зарегистрироваться</button>
+                <div class="modal-footer">
+                    Уже есть аккаунт? <a onclick="switchTab('login')">Войти</a>
+                </div>
+            </form>
+
+            <!-- Форма входа -->
+            <form class="login-form" id="loginForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">Электронная почта</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="Электронная почта">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="Пароль">
+                </div>
+                <p class="form-error" id="loginError"></p>
+                <button type="submit" class="submit-btn" id="loginBtn" onclick="handleLogin()">Войти</button>
+                <div class="modal-footer">
+                    Нет аккаунта? <a onclick="switchTab('register')">Зарегистрироваться</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="/front/js/pres_add.js"></script>
     <script src="/front/js/auth.js"></script>
 </body>
