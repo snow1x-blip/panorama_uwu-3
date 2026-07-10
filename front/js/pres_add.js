@@ -98,7 +98,7 @@
         try {
             console.log('Отправка POST запроса на /process');
             
-            const response = await fetch('http://localhost:8000/process', {
+            const response = await fetch('/process', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -225,13 +225,8 @@
             
             photoPlaceholders.forEach((placeholder, index) => {
                 if (data.images[index]) {
-                    // Убираем "static/" из начала пути, если он есть
-                    let imagePath = data.images[index];
-                    if (imagePath.startsWith('static/')) {
-                        imagePath = imagePath.substring(7); // убираем "static/"
-                    }
-                    
-                    const imageUrl = 'esoft_front/static/' + imagePath;
+                    // Путь уже /static/img/{id}/{file} — FastAPI монтирует /static → esoft_front/static
+                    const imageUrl = data.images[index];
                     console.log(`Загрузка фото ${index + 1}:`, imageUrl);
                     
                     const img = document.createElement('img');
