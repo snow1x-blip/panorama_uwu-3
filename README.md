@@ -1,1 +1,1 @@
-бурмалда-v2
+[![Typing SVG](https://readme-typing-svg.demolab.com/?lines=Боже+храни;Серого+кардинала)](https://git.io/typing-svg)
