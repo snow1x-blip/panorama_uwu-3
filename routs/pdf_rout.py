@@ -1,4 +1,6 @@
 import os
+import shutil
+from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -8,12 +10,13 @@ from models.pdf import Pdf
 from database import engine, get_db, Base
 from services.user_services import get_current_user
 
+UPLOAD_DIR = Path("uploads/pdfs")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 router = APIRouter(
     tags=["pdf"],
     responses={404: {"description": "Not found"}},
 )
-
 
 @router.get("/files/{pdf_user}") 
 async def get_pdf(pdf_user: str, db: Session = Depends(get_db)):
@@ -37,24 +40,17 @@ async def get_pdf(pdf_user: str, db: Session = Depends(get_db)):
 
     return files_info
 
-
 @router.get("/download/{filename}")
 async def download_pdf(
     filename: str, 
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user)
 ):
-    """
-    Эндпоинт для скачивания конкретного PDF файла.
-    Проверяет, что файл действительно принадлежит текущему пользователю.
-    """
-    # Ищем файл в БД по имени и пользователю (защита от скачивания чужих файлов)
-    # Примечание: если user_name в БД это email, используем current_user.email
     user_identifier = current_user.email if hasattr(current_user, 'email') else current_user.username
     
     query = select(Pdf).where(
         Pdf.user_name == user_identifier,
-        Pdf.path_to_pdf.like(f"%{filename}") # Ищем по вхождению имени файла в путь
+        Pdf.path_to_pdf.like(f"%{filename}") 
     )
     result = db.execute(query)
     doc = result.scalars().first()
@@ -62,18 +58,53 @@ async def download_pdf(
     if not doc or not os.path.exists(doc.path_to_pdf):
         raise HTTPException(status_code=404, detail="Файл не найден или у вас нет к нему доступа")
         
-    # Отдаем файл браузеру
     return FileResponse(
         path=doc.path_to_pdf,
         filename=filename,
         media_type='application/pdf'
     )
 
-
 @router.post("/upload/pdf/{filename}")
-def upload_pdf(
+async def upload_pdf(
     filename: str, 
+    file: UploadFile = File(...),
     db: Session = Depends(get_db), 
-    current_user: Session = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    pass
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Неверный формат файла. Разрешен только PDF."
+        )
+
+    if not filename.lower().endswith('.pdf'):
+        filename += '.pdf'
+        
+    file_path = UPLOAD_DIR / filename
+
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка при сохранении файла: {str(e)}"
+        )
+
+    user_identifier = current_user.email if hasattr(current_user, 'email') else current_user.username
+
+    new_pdf = Pdf(
+        user_name=user_identifier,
+        path_to_pdf=str(file_path) 
+    )
+    
+    db.add(new_pdf)
+    db.commit()
+    db.refresh(new_pdf)
+
+    return {
+        "message": "Файл успешно загружен",
+        "filename": filename,
+        "path": str(file_path),
+        "id": new_pdf.id
+    }

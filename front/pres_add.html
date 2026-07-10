@@ -113,6 +113,103 @@
                         </svg>
                     </button>
                 </div>
+                <!-- Сценарий презентации (скрыт до генерации) -->
+                <div id="scenarioSection" class="info-box" style="display: none; margin-top: 32px;">
+                    <h3>Сценарий презентации:</h3>
+                    <p class="description-text">*Вы можете добавить информацию о вашем клиенте</p>
+                    
+                    <!-- Кнопка редактирования сценария -->
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                        <button id="editScenarioBtn" class="btn btn-outline" style="padding: 6px 16px; font-size: 13px;">
+                            Редактировать
+                        </button>
+                    </div>
+                    
+                    <!-- Текст сценария (для просмотра) -->
+                    <div id="scenarioView" class="description-text" style="margin-bottom: 16px;"></div>
+                    
+                    <!-- Textarea для редактирования (скрыта по умолчанию) -->
+                    <textarea id="scenarioEdit" class="scenario-textarea" style="display: none; margin-bottom: 16px;" rows="12"></textarea>
+                    
+                    <!-- Кнопки сохранения/отмены редактирования -->
+                    <div id="scenarioEditButtons" style="display: none; gap: 12px; margin-bottom: 24px;">
+                        <button id="saveScenarioBtn" class="btn btn-primary" style="padding: 8px 20px;">Сохранить</button>
+                        <button id="cancelEditBtn" class="btn btn-outline" style="padding: 8px 20px;">Отмена</button>
+                    </div>
+                    
+                    <!-- Настройки генерации презентации -->
+                    <div class="presentation-settings" style="background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                        <h4 style="margin-bottom: 20px; font-size: 16px; font-weight: 700; color: #1a1a1a;">Настройки презентации:</h4>
+                        
+                        <div class="settings-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            <!-- Количество слайдов -->
+                            <div class="setting-field">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    Количество слайдов:
+                                </label>
+                                <input type="number" id="nSlidesInput" min="3" max="20" value="6" 
+                                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit;">
+                            </div>
+                            
+                            <!-- Шаблон -->
+                            <div class="setting-field">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    Шаблон:
+                                </label>
+                                <select id="templateSelect" 
+                                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff;">
+                                    <option value="general">Общий</option>
+                                    <option value="business">Бизнес</option>
+                                    <option value="modern">Современный</option>
+                                    <option value="minimal">Минимализм</option>
+                                    <option value="creative">Креативный</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Формат экспорта -->
+                            <div class="setting-field">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    Формат экспорта:
+                                </label>
+                                <select id="exportAsSelect" 
+                                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff;">
+                                    <option value="pptx">PowerPoint (.pptx)</option>
+                                    <option value="pdf">PDF (.pdf)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Тон -->
+                            <div class="setting-field">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    Тон презентации:
+                                </label>
+                                <select id="toneSelect" 
+                                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff;">
+                                    <option value="default">Стандартный</option>
+                                    <option value="formal">Официальный</option>
+                                    <option value="casual">Неформальный</option>
+                                    <option value="persuasive">Убеждающий</option>
+                                    <option value="educational">Образовательный</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопка генерации презентации -->
+                    <div class="actions-row" style="margin-top: 24px;">
+                        <button id="generatePresentationBtn" class="btn btn-primary">Сгенерировать презентацию</button>
+                    </div>
+                    <div id="downloadSection" class="actions-row" style="display: none; margin-top: 16px;">
+                        <a id="downloadPdfBtn" class="btn btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;" target="_blank">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Скачать презентацию
+                        </a>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
