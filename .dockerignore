@@ -1,7 +1,8 @@
-.git
+.git/
 .gitignore
-.venv
-__pycache__
+.venv/
+venv/
+__pycache__/
 *.pyc
 .env
 *.db

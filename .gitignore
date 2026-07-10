@@ -1,28 +1,20 @@
-# Игнорировать папки сборки и скомпилированные файлы
-build/
-dist/
+.git/
+.gitignore
+.venv/
+__pycache__/
 *.pyc
-*.o
-
-# Игнорировать кэш и временные файлы
-.DS_Store
-Thumbs.db
-node_modules/
-venv/
-env/
-
-# Игнорировать файлы конфигурации среды и пароли
 .env
-*.local
-
-# Игнорировать системные папки IDE
-.idea/
-.vscode/
-
-# Игнорировать логи
-logs/
-*.log
-
-parser/image/
-
-esoft_front/static/
+*.db
+.idea
+.vscode
+node_modules
+*.md
+esoft_front/static
+.dockerignore
+Dockerfile
+docker-compose.yml
+nginx.conf
+__pycache__/database.cpython-314.pyc
+__pycache__/main.cpython-314.pyc
+esoft_front/js/ai-vitrina.js
+nginx.conf

@@ -805,7 +805,7 @@ class AiVitrina {
         pdfBtn.textContent = 'Авторизация...';
         
         // Шаг 1: Авторизация для получения JWT токена
-        fetch('http://127.0.0.1:5001/api/v1/auth/login', {
+        fetch('http://81.26.189.36:5001/api/v1/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -850,7 +850,7 @@ class AiVitrina {
                     trigger_webhook: false
                 };
                 
-                return fetch('http://127.0.0.1:5001/api/v1/ppt/presentation/generate', {
+                return fetch('http://81.26.189.36:5001/api/v1/ppt/presentation/generate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
