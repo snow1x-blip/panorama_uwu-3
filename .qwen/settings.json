@@ -31,7 +31,9 @@
       "Bash(lsof *)",
       "Bash(xargs *)",
       "Bash(docker exec *)",
-      "Bash(sudo *)"
+      "Bash(sudo *)",
+      "Bash(cp *)",
+      "Read(//home/neutrino/Documents/panorama_grani/**)"
     ]
   },
   "$version": 4
