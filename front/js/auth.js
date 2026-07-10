@@ -277,7 +277,7 @@ function updateHeaderButtons(user) {
     if (user) {
         const email = user.email || getUserEmail() || '';
         container.innerHTML =
-            '<button class="header-btn header-username-btn" onclick="window.location.href=\'profile.html\'">' + email + '</button>' +
+            '<button class="header-btn header-username-btn" onclick="window.location.href=\'/front/profile.html\'">' + email + '</button>' +
             '<button class="header-btn" onclick="logout()">выйти</button>';
     } else {
         container.innerHTML =
