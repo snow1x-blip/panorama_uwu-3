@@ -1,39 +1,20 @@
 import json
 import uuid
-import mimetypes
 import requests
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
 from duckduckgo_search import DDGS
 from playwright.async_api import async_playwright
 
 from utils import (
-    IMAGE_DIR, log_event, load_json_file,
-    validate_client_data, validate_manager_data,
-    replace_placeholders, append_to_json_array
+    IMAGE_DIR, log_event,
+    append_to_json_array
 )
 
 import os
 from dotenv import load_dotenv
 load_dotenv()
 API_KEY = os.environ.get("API_KEY")
-
-
-def validate_input_data():
-    """Проверяет наличие и валидность всех входных JSON файлов."""
-    client = load_json_file("client.json")
-    validate_client_data(client)
-
-    manager = load_json_file("manager_con.json")
-    validate_manager_data(manager)
-
-    prompt_data = load_json_file("present_promt_input.json")
-    prompt_template = prompt_data.get("prompt_template", "")
-    if not prompt_template:
-        raise ValueError("prompt_template пуст в present_promt_input.json")
-
-    return client, manager, prompt_template
 
 
 async def download_image(url: str, save_path: Path) -> bool:
@@ -338,25 +319,10 @@ def determine_source(url: str) -> str:
     return result[1]
 
 
-def generate_presentation_prompt(apartment_data: dict, prompt_template: str) -> str:
-    apartment_text = "\n".join([f"{k}: {v}" for k, v in apartment_data.items() if v is not None])
-    full_prompt = f"""
-{prompt_template}
-
-ДАННЫЕ О КВАРТИРЕ:
-{apartment_text}
-
-Сгенерируй полный промт для Gamma.app на основе этих данных.
-"""
-    return call_llm(full_prompt, max_tokens=2500)
-
-
 async def process_apartment(url: str) -> dict:
     """Основная функция обработки — вызывается из эндпоинта."""
     if not API_KEY:
         raise ValueError("API_KEY не найден в .env файле")
-
-    client, manager, prompt_template = validate_input_data()
 
     apartment_id = str(uuid.uuid4())
     log_event("START", "Начало обработки", url)
@@ -410,30 +376,12 @@ async def process_apartment(url: str) -> dict:
 
     append_to_json_array("cvartiry.json", apartment_card)
 
-    filled_prompt = replace_placeholders(prompt_template, client, manager)
-    presentation_prompt = generate_presentation_prompt(apartment_raw_data, filled_prompt)
-
-    presentation_data = {
-        "id": apartment_id,
-        "timestamp": created_at,
-        "status": "success",
-        "url": url,
-        "apartment_data": apartment_raw_data,
-        "client": client,
-        "manager": manager,
-        "presentation_prompt": presentation_prompt
-    }
-
-    append_to_json_array("present_promt_output.json", presentation_data)
-
     log_event("SUCCESS", f"Квартира добавлена с ID: {apartment_id}", url, {
         "apartment_id": apartment_id,
         "images_count": len(images),
-        "prompt_length": len(presentation_prompt)
     })
 
     return {
         "apartment_id": apartment_id,
         "apartment_card": apartment_card,
-        "presentation_prompt": presentation_prompt
     }
