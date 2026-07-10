@@ -17,10 +17,9 @@ body {
     align-items: center;
     padding: 20px 40px;
 }
-.logo {
-    font-size: 28px;
-    font-weight: 900;
-    letter-spacing: 2px;
+.svg-logo {
+    width: 100px;
+    height: auto;
 }
 .header-buttons {
     display: flex;

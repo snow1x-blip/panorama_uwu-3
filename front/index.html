@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Виртуальный ремонт</title>
+    <link rel="shortcut icon" href="photo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <!-- HEADER -->
     <header class="header">
-        <div class="logo">LOGO</div>
+        <img class="svg-logo" src="photo/logo.svg">
         <div class="header-buttons">
             <button class="header-btn" onclick="openModal('login')">войти</button>
             <button class="header-btn" onclick="openModal('register')">регистрация</button>
@@ -67,59 +68,8 @@
         </div>
     </section>
 
-<<<<<<< HEAD
     <script src="js/auth.js"></script>
     <script src="js/script.js"></script>
 
-=======
-    <!-- ===== AUTH MODAL ===== -->
-    <div class="modal-overlay" id="authModal">
-        <div class="modal-logo">LOGO</div>
-        <button class="close-modal" onclick="closeModal('authModal')">✕</button>
-
-        <div class="modal-card">
-            <div class="modal-tabs">
-                <button class="modal-tab active" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
-                <button class="modal-tab" id="tabLogin" onclick="switchTab('login')">Вход</button>
-            </div>
-
-            <!-- Форма регистрации (поле "Имя пользователя" убрано) -->
-            <form class="register-form" id="registerForm" onsubmit="return false;">
-                <div class="form-group">
-                    <label class="form-label">Электронная почта</label>
-                    <input type="email" class="form-input" id="regEmail" placeholder="Электронная почта">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Пароль</label>
-                    <input type="password" class="form-input" id="regPassword" placeholder="Пароль">
-                </div>
-                <p class="form-error" id="regError"></p>
-                <button type="submit" class="submit-btn" id="regBtn" onclick="handleRegister()">Зарегистрироваться</button>
-                <div class="modal-footer">
-                    Уже есть аккаунт? <a onclick="switchTab('login')">Войти</a>
-                </div>
-            </form>
-
-            <!-- Форма входа -->
-            <form class="login-form" id="loginForm" onsubmit="return false;">
-                <div class="form-group">
-                    <label class="form-label">Электронная почта</label>
-                    <input type="email" class="form-input" id="loginEmail" placeholder="Электронная почта">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Пароль</label>
-                    <input type="password" class="form-input" id="loginPassword" placeholder="Пароль">
-                </div>
-                <p class="form-error" id="loginError"></p>
-                <button type="submit" class="submit-btn" id="loginBtn" onclick="handleLogin()">Войти</button>
-                <div class="modal-footer">
-                    Нет аккаунта? <a onclick="switchTab('register')">Зарегистрироваться</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="/front/js/script.js"></script>
->>>>>>> e45f6da6e85a059231083a2925d9792023fdf756
 </body>
 </html>

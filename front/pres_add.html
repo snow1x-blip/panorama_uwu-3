@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Новый проект</title>
+    <link rel="shortcut icon" href="photo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="css/pres_add.css">
 </head>
 <body>
     <header class="header">
-        <div class="logo">LOGO</div>
+        <img class="svg-logo" src="photo/logo.svg">
         <div class="header-buttons">
             <button class="header-btn">войти</button>
             <button class="header-btn">регистрация</button>
@@ -19,18 +20,24 @@
         <!-- Sidebar -->
         <aside class="carts-sidebar">
             <nav class="carts-nav">
-                <a href="index.html" class="carts-nav-item">
+                <!-- Active item — icon + bold -->
+                <a class="carts-nav-item active" href="index.html">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
                     Главная
                 </a>
-                <a href="profile.html" class="carts-nav-item">Профиль</a>
-                <a href="pres_add.html" class="carts-nav-item active">Новая квартира</a>
-                <a href="about.html" class="carts-nav-item">О нас</a>
+                <!-- Plain text, no icons -->
+                <a class="carts-nav-item no-icon" href="profile.html">Профиль</a>
+                <a class="carts-nav-item no-icon" href="pres_add.html">Новая квартира</a>
+                <a class="carts-nav-item no-icon" href="about.html">О нас</a>
             </nav>
-            <button class="carts-logout-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
+            <button class="carts-logout-btn" onclick="logout()">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
                 выйти
             </button>
@@ -38,6 +45,10 @@
 
         <!-- Main Content -->
         <main class="main">
+            <div class="carts-search">
+                <input type="text" class="carts-search-input" placeholder="">
+            </div>
+            
             <h1 class="page-title">Новый проект</h1>
             
             <!-- Link Input -->
@@ -69,10 +80,7 @@
                         <div class="details">
                             <div>цена: <span id="price"> -</span></div>
                             <div>цена за кв.м.: <span id="pricePerSqm"> -</span></div>
-                            <div style="margin-top: 12px;">
-                                <span class="label">адрес:</span><br>
-                                <span id="address"></span>
-                            </div>
+                            <div>адрес: <span id="address"> -</span></div>
                         </div>
                     </div>
                 </div>
