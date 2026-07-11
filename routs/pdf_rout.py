@@ -12,6 +12,7 @@ from services.user_services import get_current_user
 
 UPLOAD_DIR = Path("uploads/pdfs")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+BASE_DIR_PRESENTON = "~/presenton_ai/presenton"
 
 router = APIRouter(
     tags=["pdf"],
@@ -108,3 +109,25 @@ async def upload_pdf(
         "path": str(file_path),
         "id": new_pdf.id
     }
+
+
+@router.get("/download_presenton/{filename}")
+async def download_pdf(
+    filename: str,
+):
+    filepath = f"{BASE_DIR_PRESENTON}/{filename}"
+
+    if not str(file_path).startswith(str(BASE_DIR_PRESENTON)):
+        raise HTTPException(
+            status_code=400, 
+            detail="Ошибка: недопустимый путь к файлу"
+        )
+
+    if not filepath.is_file():
+        raise HTTPException(status_code=404, detail="Файл не найден")    
+        
+    return FileResponse(
+        path=filepath,
+        filename=filename,
+        media_type='application/pdf'
+    )

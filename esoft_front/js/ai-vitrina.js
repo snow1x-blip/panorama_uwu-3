@@ -1121,4 +1121,3 @@ class AiVitrina {
 if (typeof window !== 'undefined') {
     window.AiVitrina = AiVitrina;
 }
-
