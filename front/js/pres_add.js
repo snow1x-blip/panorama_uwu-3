@@ -218,19 +218,15 @@
         // Фотографии
         if (photoPlaceholders.length > 0 && data.images && data.images.length > 0) {
             console.log('📷 Загрузка фотографий:', data.images.length, 'шт.');
-            
+
             photoPlaceholders.forEach((placeholder, index) => {
                 if (data.images[index]) {
                     let imagePath = data.images[index];
-                    if (imagePath.startsWith('/static/')) {
-                        imagePath = imagePath.substring(8);
-                    } else if (imagePath.startsWith('static/')) {
-                        imagePath = imagePath.substring(7);
-                    }
-
-                    const imageUrl = '/esoft_front/static/img' + imagePath;
+                    // Парсер возвращает пути вида /static/img/{id}/{file}
+                    // Нужно преобразовать в /esoft_front/static/img/{id}/{file}
+                    const imageUrl = '/esoft_front' + (imagePath.startsWith('/') ? imagePath : '/' + imagePath);
                     console.log(`Загрузка фото ${index + 1}:`, imageUrl);
-                    
+
                     const img = document.createElement('img');
                     img.src = imageUrl;
                     img.alt = 'Фото квартиры ' + (index + 1);
@@ -238,16 +234,16 @@
                     img.style.height = '100%';
                     img.style.objectFit = 'cover';
                     img.style.borderRadius = '12px';
-                    
+
                     img.onerror = function() {
                         console.error('❌ Не удалось загрузить изображение:', imageUrl);
                         placeholder.textContent = 'фото квартиры';
                     };
-                    
+
                     img.onload = function() {
                         console.log(`✓ Фото ${index + 1} загружено`);
                     };
-                    
+
                     placeholder.innerHTML = '';
                     placeholder.appendChild(img);
                 }
