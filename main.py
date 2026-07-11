@@ -43,6 +43,24 @@ app.include_router(presa_router)
 @app.get("/")
 async def root():
     return FileResponse("front/index.html")
+<<<<<<< HEAD
+=======
+
+
+@app.get("/create")
+async def create_page():
+    return FileResponse("front/pres_add.html")
+
+
+@app.get("/profile")
+async def profile_page():
+    return FileResponse("front/profile.html")
+
+
+@app.get("/about")
+async def about_page():
+    return FileResponse("front/about.html")
+>>>>>>> a03f214f7f42029419cc157900431f0dc996884d
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

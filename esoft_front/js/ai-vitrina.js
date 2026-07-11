@@ -1037,7 +1037,9 @@ class AiVitrina {
 
             // Шаг 3: Скачивание через export-presentation
             const title = this.currentPropertyData?.title || 'presentation';
-            const exportUrl = `http://81.26.189.36/api/export-presentation?format=${encodeURIComponent(exportAs)}&id=${encodeURIComponent(presentationId)}&title=${encodeURIComponent(title)}`;
+            const presentationPath = data.path || '';
+            const presentationName = presentationPath.split('/').pop() || presentationId;
+            const exportUrl = `http://81.26.189.36:5001/api/export-presentation/file?name=${encodeURIComponent(presentationName)}`;
 
             const downloadLink = document.createElement('a');
             downloadLink.href = exportUrl;
