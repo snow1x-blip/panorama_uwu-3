@@ -133,7 +133,7 @@
         try {
             console.log('Отправка POST запроса на /process');
             
-            const response = await fetch('http://localhost:8000/process', {
+            const response = await fetch('https://graniai.server72.ru/process', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
