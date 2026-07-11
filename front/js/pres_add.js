@@ -224,7 +224,7 @@
                     let imagePath = data.images[index];
                     // Парсер возвращает пути вида /static/img/{id}/{file}
                     // Нужно преобразовать в /esoft_front/static/img/{id}/{file}
-                    const imageUrl = '/esoft_front/static/img/' + imagePath;
+                    const imageUrl = '/esoft_front/static/img' + imagePath;
                     console.log(`Загрузка фото ${index + 1}:`, imageUrl);
 
                     const img = document.createElement('img');
