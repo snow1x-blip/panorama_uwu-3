@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'https://127.0.0.1:8000';
 
 function getToken() {
     return localStorage.getItem('access_token');
