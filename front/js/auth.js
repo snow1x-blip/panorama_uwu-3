@@ -1,4 +1,4 @@
-const API_BASE = 'https://graniai.server72.ru';
+const API_BASE = '';
 
 function getToken() {
     return localStorage.getItem('access_token');
