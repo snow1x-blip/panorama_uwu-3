@@ -334,9 +334,8 @@
                 throw new Error('Ошибка при генерации сценария: ' + response.status);
             }
             
-            // Ответ приходит как строка (возможно JSON)
             const responseText = await response.text();
-            console.log('✅ Сценарий получен, длина:', responseText.length);
+            console.log('Сценарий получен, длина:', responseText.length);
             
             // Пытаемся распарсить JSON
             let scenarioText = responseText;
@@ -356,7 +355,7 @@
             // Обрабатываем escape-последовательности
             scenarioText = scenarioText.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"');
             
-            console.log('📝 Финальный текст сценария:', scenarioText.substring(0, 100) + '...');
+            console.log('Финальный текст сценария:', scenarioText.substring(0, 100) + '...');
             
             // Сохраняем сценарий
             currentScenario = scenarioText;
