@@ -228,7 +228,7 @@
                         imagePath = imagePath.substring(7);
                     }
 
-                    const imageUrl = '/esoft_front/static/' + imagePath;
+                    const imageUrl = '/esoft_front/static/img' + imagePath;
                     console.log(`Загрузка фото ${index + 1}:`, imageUrl);
                     
                     const img = document.createElement('img');
@@ -499,28 +499,28 @@
     // Генерация презентации
     async function generatePresentation() {
         console.log('generatePresentation вызвана');
-        
+
         if (!currentScenario) {
             alert('Сначала сгенерируйте сценарий презентации');
             return;
         }
-        
+
         // Проверяем, есть ли токен, если нет - выполняем авторизацию
         if (!presentationToken) {
             console.log('Токен не найден, выполняем авторизацию...');
             presentationToken = await authenticatePresentationService();
-            
+
             if (!presentationToken) {
                 return; // Авторизация не удалась
             }
         }
-        
+
         // Получаем значения из полей настроек
         const nSlides = parseInt(nSlidesInput?.value) || 6;
         const template = templateSelect?.value || 'general';
         const exportAs = exportAsSelect?.value || 'pptx';
         const tone = toneSelect?.value || 'default';
-        
+
         // Формируем payload
         const payload = {
             content: currentScenario,
@@ -538,21 +538,15 @@
             export_as: exportAs,
             trigger_webhook: false
         };
-        
+
         console.log('📤 Отправка данных для генерации презентации:', JSON.stringify(payload, null, 2));
-        
+
         // Показываем загрузку на кнопке
         if (generatePresentationBtn) {
             generatePresentationBtn.disabled = true;
             generatePresentationBtn.innerHTML = '<span class="loading-spinner"></span>Генерация...';
         }
-        
-        // Скрываем кнопку скачивания если она была показана
-        const downloadSection = document.getElementById('downloadSection');
-        if (downloadSection) {
-            downloadSection.style.display = 'none';
-        }
-        
+
         try {
             // Шаг 1: Генерация презентации
             const response = await fetch('/api/v1/ppt/presentation/generate', {
@@ -563,93 +557,51 @@
                 },
                 body: JSON.stringify(payload)
             });
-            
+
             console.log('Статус ответа презентации:', response.status);
-            
+
             if (response.status === 401 || response.status === 403) {
                 alert('Ошибка авторизации. Токен мог истечь. Пожалуйста, введите username и password снова.');
                 sessionStorage.removeItem('presentation_token');
                 presentationToken = null;
                 return;
             }
-            
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('Ошибка ответа презентации:', errorText);
                 throw new Error('Ошибка при генерации презентации: ' + response.status);
             }
-            
-            // Получаем файл как blob
-            const blob = await response.blob();
-            console.log('✅ Презентация сгенерирована, размер:', blob.size, 'байт');
-            
-            // Определяем расширение и MIME-тип
-            const fileExtension = exportAs === 'pptx' ? 'pptx' : 'pdf';
-            const mimeType = exportAs === 'pptx' 
-                ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
-                : 'application/pdf';
-            
-            // Формируем имя файла
-            const propertyId = currentPropertyData?.id || 'property';
-            const timestamp = Date.now();
-            const fileName = `presentation_${propertyId}_${timestamp}.${fileExtension}`;
-            
-            // Шаг 2: Загрузка файла на бекенд через /upload/pdf/{filename}
-            console.log(' Загрузка файла на бекенд:', fileName);
-            
-            const formData = new FormData();
-            formData.append('file', blob, fileName);
-            
-            const uploadResponse = await fetch(`/upload/pdf/${encodeURIComponent(fileName)}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${typeof getToken === 'function' ? getToken() : localStorage.getItem('access_token')}`
-                },
-                body: formData
-            });
-            
-            console.log('Статус загрузки на бекенд:', uploadResponse.status);
-            
-            if (!uploadResponse.ok) {
-                const uploadErrorText = await uploadResponse.text();
-                console.error('Ошибка загрузки на бекенд:', uploadErrorText);
-                throw new Error('Ошибка при загрузке файла на сервер: ' + uploadResponse.status);
+
+            // Парсим ответ для получения ID презентации
+            const result = await response.json();
+            console.log('✅ Ответ генерации:', JSON.stringify(result, null, 2));
+
+            // Извлекаем ID презентации (проверяем разные возможные поля)
+            const presentationId = result.id || result.presentation_id || result.presentationId;
+
+            if (!presentationId) {
+                console.error('ID презентации не найден в ответе:', result);
+                throw new Error('ID презентации не получен от сервера');
             }
-            
-            const uploadResult = await uploadResponse.json();
-            console.log('✅ Файл загружен на бекенд:', uploadResult);
-            
-            // Получаем путь к файлу из ответа
-            const filePath = uploadResult.path || uploadResult.edit_path;
-            
-            if (filePath) {
-                // Настраиваем кнопку скачивания
-                const downloadBtn = document.getElementById('downloadPdfBtn');
-                if (downloadBtn) {
-                    // Если путь относительный - добавляем базовый URL бекенда
-                    const downloadUrl = filePath.startsWith('https') 
-                        ? filePath 
-                        : `${filePath.startsWith('/') ? '' : '/'}${filePath}`;
-                    
-                    downloadBtn.href = downloadUrl;
-                    downloadBtn.download = fileName;
-                    
-                    console.log('🔗 Ссылка для скачивания:', downloadUrl);
-                }
-                
-                // Показываем кнопку скачивания
-                if (downloadSection) {
-                    downloadSection.style.display = 'flex';
-                    console.log('Кнопка скачивания показана');
-                }
-            } else {
-                console.warn('️ Путь к файлу не найден в ответе, скачиваем локально');
-                // Фоллбэк: скачиваем файл напрямую из blob
-                downloadBlobLocally(blob, fileName);
-            }
-            
-            alert('Презентация успешно сгенерирована и загружена на сервер!');
-            
+
+            console.log('✓ ID презентации:', presentationId);
+
+            // Шаг 2: Скачивание через export-presentation
+            const title = currentPropertyData?.title || 'presentation';
+            const exportUrl = `http://81.26.189.36/api/export-presentation?format=${encodeURIComponent(exportAs)}&id=${encodeURIComponent(presentationId)}&title=${encodeURIComponent(title)}`;
+
+            console.log('⬇️ Скачивание презентации:', exportUrl);
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = exportUrl;
+            downloadLink.download = `${title}.${exportAs}`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            console.log('✅ Скачивание запущено');
+
         } catch (error) {
             console.error('❌ Ошибка генерации презентации:', error);
             alert('Не удалось сгенерировать презентацию. Попробуйте снова.');
