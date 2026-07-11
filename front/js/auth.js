@@ -1,4 +1,4 @@
-const API_BASE = 'https://81.26.189.36:8001';
+const API_BASE = 'https://graniai.server72.ru/';
 
 function getToken() {
     return localStorage.getItem('access_token');
