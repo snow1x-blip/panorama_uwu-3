@@ -575,8 +575,8 @@
 
             // Извлекаем ID презентации (проверяем разные возможные поля)
             const presentationId = result.id || result.presentation_id || result.presentationId;
-            const presentationPath = result.path;
-            const presentationNmae = presentationPath.split('/').pop();
+            const presentationPath = result.path || '';
+            const presentationNmae = presentationPath.split('/').pop() || presentationId;
 
             if (!presentationId) {
                 console.error('ID презентации не найден в ответе:', result);
