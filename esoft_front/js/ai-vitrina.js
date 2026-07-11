@@ -937,7 +937,7 @@ class AiVitrina {
             .then(({ data, token }) => {
                 console.log('Презентация успешно сгенерирована:', data);
                 
-                const presentationId = data.presentation_id;
+                const presentationId = data.path;
                 const filePath = data.path;
                 
                 if (!presentationId || !filePath) {
@@ -984,7 +984,7 @@ class AiVitrina {
     }
 
     downloadGeneratedFile(filePath, token, presentationId) {
-        const fileUrl = `http://81.26.189.36:5001/api/v1/ppt/presentation/download/${presentationId}`;
+        const fileUrl = `~/prod/presenton${presentationId}`;
 
         return fetch(fileUrl, {
             method: 'GET',
