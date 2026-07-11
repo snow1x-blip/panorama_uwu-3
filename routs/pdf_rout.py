@@ -12,7 +12,7 @@ from services.user_services import get_current_user
 
 UPLOAD_DIR = Path("uploads/pdfs")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-BASE_DIR_PRESENTON = "prod/presenton"
+BASE_DIR_PRESENTON = "/home/snow1x/presenton_ai/presenton/"
 
 router = APIRouter(
     tags=["pdf"],

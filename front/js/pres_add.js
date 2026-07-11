@@ -579,6 +579,8 @@
 
             // Извлекаем ID презентации (проверяем разные возможные поля)
             const presentationId = result.id || result.presentation_id || result.presentationId;
+            const presentationPath = result.path;
+            const presentationNmae = presentationPath.split('/').pop();
 
             if (!presentationId) {
                 console.error('ID презентации не найден в ответе:', result);
@@ -589,7 +591,7 @@
 
             // Шаг 2: Скачивание через export-presentation
             const title = currentPropertyData?.title || 'presentation';
-            const exportUrl = `http://81.26.189.36/api/export-presentation?format=${encodeURIComponent(exportAs)}&id=${encodeURIComponent(presentationId)}&title=${encodeURIComponent(title)}`;
+            const exportUrl = `http://127.0.0.1:5001/api/export-presentation/file?name=${presentationNmae}`;
 
             console.log('⬇️ Скачивание презентации:', exportUrl);
 
