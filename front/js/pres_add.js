@@ -222,11 +222,13 @@
             photoPlaceholders.forEach((placeholder, index) => {
                 if (data.images[index]) {
                     let imagePath = data.images[index];
-                    if (imagePath.startsWith('static/')) {
+                    if (imagePath.startsWith('/static/')) {
+                        imagePath = imagePath.substring(8);
+                    } else if (imagePath.startsWith('static/')) {
                         imagePath = imagePath.substring(7);
                     }
-                    
-                    const imageUrl = 'esoft_front/static/' + imagePath;
+
+                    const imageUrl = '/esoft_front/static/' + imagePath;
                     console.log(`Загрузка фото ${index + 1}:`, imageUrl);
                     
                     const img = document.createElement('img');
@@ -311,7 +313,7 @@
         }
         
         try {
-            const response = await fetch('/ai_gen/presa/', {
+            const response = await fetch('/ai_gen/presa', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -403,7 +405,7 @@
         console.log(' Выполняем авторизацию в сервисе генерации...');
         
         try {
-            const response = await fetch('/api/v1/auth/login/', {
+            const response = await fetch('/api/v1/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
