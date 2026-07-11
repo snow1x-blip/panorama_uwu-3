@@ -224,7 +224,7 @@
                     let imagePath = data.images[index];
                     // Парсер возвращает пути вида /static/img/{id}/{file}
                     // Нужно преобразовать в /esoft_front/static/img/{id}/{file}
-                    const imageUrl = '/esoft_front/static/img' + imagePath;
+                    const imageUrl = '/esoft_front' + imagePath;
                     console.log(`Загрузка фото ${index + 1}:`, imageUrl);
 
                     const img = document.createElement('img');
@@ -545,7 +545,7 @@
 
         try {
             // Шаг 1: Генерация презентации
-            const response = await fetch('http://81.26.189.36:5001/api/v1/ppt/presentation/generate', {
+            const response = await fetch('https://graniai.server72.ru:5001/api/v1/ppt/presentation/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
