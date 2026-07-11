@@ -408,6 +408,52 @@ class AiVitrina {
                 background: #9ca3af;
                 cursor: not-allowed;
             }
+            .ai-download-pdf-btn {
+                flex: 1;
+                border: none;
+                border-radius: 8px;
+                padding: 12px;
+                background: #3b82f6;
+                color: white;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.2s;
+                display: none;
+            }
+            .ai-download-pdf-btn.active {
+                display: block;
+            }
+            .ai-download-pdf-btn:hover {
+                background: #2563eb;
+            }
+            .ai-download-pdf-btn:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
+            .ai-upload-pdf-btn {
+                flex: 1;
+                border: none;
+                border-radius: 8px;
+                padding: 12px;
+                background: #8b5cf6;
+                color: white;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.2s;
+                display: none;
+            }
+            .ai-upload-pdf-btn.active {
+                display: block;
+            }
+            .ai-upload-pdf-btn:hover {
+                background: #7c3aed;
+            }
+            .ai-upload-pdf-btn:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
         `;
         const styleSheet = document.createElement('style');
         styleSheet.textContent = styles;
@@ -602,6 +648,12 @@ class AiVitrina {
                                 <button class="ai-back-btn" id="presentationBackBtn">Назад</button>
                                 <button class="ai-generate-pdf-btn" id="generatePdfBtn">Сгенерировать PDF</button>
                             </div>
+                            <div class="ai-result-actions" style="margin-top: 10px;">
+                                <button class="ai-download-pdf-btn" id="downloadPdfBtn">Скачать PDF</button>
+                            </div>
+                            <div class="ai-result-actions" style="margin-top: 10px;">
+                                <button class="ai-upload-pdf-btn" id="uploadPdfBtn">Загрузить на сервер</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -640,6 +692,16 @@ class AiVitrina {
         const pdfBtn = this.panel.querySelector('#generatePdfBtn');
         if (pdfBtn) {
             pdfBtn.addEventListener('click', () => this.handleGeneratePdf());
+        }
+        
+        const downloadBtn = this.panel.querySelector('#downloadPdfBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => this.handleDownloadPdf());
+        }
+
+        const uploadBtn = this.panel.querySelector('#uploadPdfBtn');
+        if (uploadBtn) {
+            uploadBtn.addEventListener('click', () => this.handleUploadPdfToSystem());
         }
     }
 
@@ -800,17 +862,33 @@ class AiVitrina {
         const nSlides = parseInt(this.panel.querySelector('#pdfNSlides').value) || 10;
         
         const pdfBtn = this.panel.querySelector('#generatePdfBtn');
+        const downloadBtn = this.panel.querySelector('#downloadPdfBtn');
         const originalText = pdfBtn.textContent;
         pdfBtn.disabled = true;
         pdfBtn.textContent = 'Авторизация...';
+        
+        // Скрываем кнопку скачивания при новой генерации
+        if (downloadBtn) {
+            downloadBtn.classList.remove('active');
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = 'Скачать PDF';
+        }
+
+        const uploadBtn = this.panel.querySelector('#uploadPdfBtn');
+        if (uploadBtn) {
+            uploadBtn.classList.remove('active');
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Загрузить на сервер';
+            uploadBtn.style.background = '';
+        }
         
         // Шаг 1: Авторизация для получения JWT токена
         fetch('http://81.26.189.36:5001/api/v1/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                username: 'snow1x',
-                password: 'scoray_y1t'
+                username: 'neutrino',
+                password: 'G7L2J3P726a/'
             })
         })
             .then(async response => {
@@ -821,7 +899,6 @@ class AiVitrina {
                 return response.json();
             })
             .then(authData => {
-                // Извлекаем JWT токен (обычно в поле access_token или token)
                 const token = authData.access_token || authData.token || authData.accessToken || '';
                 if (!token) {
                     throw new Error('JWT токен не получен от сервера');
@@ -829,10 +906,8 @@ class AiVitrina {
                 
                 console.log('Успешная авторизация, получен JWT токен');
                 
-                // Меняем текст кнопки перед вторым запросом
                 pdfBtn.textContent = 'Генерация...';
                 
-                // Шаг 2: Генерация презентации с JWT токеном в заголовке Bearer
                 const requestBody = {
                     content: content,
                     slides_markdown: [],
@@ -857,25 +932,46 @@ class AiVitrina {
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(requestBody),
-                });
+                }).then(response => response.json().then(data => ({ data, token })));
             })
-            .then(async response => {
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Ошибка генерации: ${response.status} - ${errorText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
+            .then(({ data, token }) => {
                 console.log('Презентация успешно сгенерирована:', data);
-                alert('Презентация успешно сгенерирована!');
                 
+                const presentationId = data.presentation_id;
+                const filePath = data.path;
+                
+                if (!presentationId || !filePath) {
+                    throw new Error('Не получен presentation_id или path из ответа сервера');
+                }
+                
+                // Сохраняем данные для последующего скачивания
+                this.generatedPresentation = {
+                    presentationId,
+                    path: filePath,
+                    token: token
+                };
+                
+                pdfBtn.textContent = 'Загрузка файла...';
+                
+                // Шаг 3: Скачивание сгенерированного файла
+                return this.downloadGeneratedFile(filePath, token, presentationId).then(() => ({ token, presentationId }));
+            })
+            .then(({ token, presentationId }) => {
+                console.log('Файл скачан, доступен для загрузки на сервер');
+
                 pdfBtn.disabled = false;
                 pdfBtn.textContent = originalText;
-                
-                // Если есть ссылка на скачивание - открываем её
-                if (data.download_url || data.file_url) {
-                    window.open(data.download_url || data.file_url, '_blank');
+
+                if (downloadBtn) {
+                    downloadBtn.classList.add('active');
+                }
+
+                const uploadBtn = this.panel.querySelector('#uploadPdfBtn');
+                if (uploadBtn) {
+                    uploadBtn.classList.add('active');
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Загрузить на сервер';
+                    uploadBtn.style.background = '';
                 }
             })
             .catch(err => {
@@ -885,6 +981,107 @@ class AiVitrina {
                 pdfBtn.disabled = false;
                 pdfBtn.textContent = originalText;
             });
+    }
+
+    downloadGeneratedFile(filePath, token, presentationId) {
+        const fileUrl = `http://81.26.189.36:5001/api/v1/ppt/presentation/download/${presentationId}`;
+
+        return fetch(fileUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Ошибка скачивания файла: ${response.status} - ${errorText}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                this.generatedPresentation.fileBlob = blob;
+                return blob;
+            });
+    }
+
+    handleUploadPdfToSystem() {
+        const uploadBtn = this.panel.querySelector('#uploadPdfBtn');
+        if (!uploadBtn) return;
+
+        if (!this.generatedPresentation || !this.generatedPresentation.fileBlob) {
+            alert('Сначала сгенерируйте презентацию');
+            return;
+        }
+
+        const { presentationId, fileBlob } = this.generatedPresentation;
+        const appToken = localStorage.getItem('token') || localStorage.getItem('access_token') || '';
+
+        if (!appToken) {
+            alert('Необходима авторизация в приложении');
+            return;
+        }
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Загрузка...';
+
+        const formData = new FormData();
+        formData.append('file', fileBlob, `${presentationId}.pdf`);
+
+        fetch(`/upload/pdf/${presentationId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${appToken}`
+            },
+            body: formData
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Ошибка загрузки: ${response.status} - ${errorText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Файл загружен на сервер:', data);
+                this.generatedPresentation.uploadedPath = data.path;
+                this.generatedPresentation.uploadedId = data.id;
+
+                uploadBtn.textContent = 'Загружено ✓';
+                uploadBtn.style.background = '#059669';
+            })
+            .catch(err => {
+                console.error('Ошибка загрузки на сервер:', err);
+                alert('Ошибка загрузки: ' + err.message);
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Загрузить на сервер';
+            });
+    }
+
+    handleDownloadPdf() {
+        if (!this.generatedPresentation) {
+            alert('Файл ещё не сгенерирован');
+            return;
+        }
+
+        if (this.generatedPresentation.uploadedPath) {
+            window.open(this.generatedPresentation.uploadedPath, '_blank');
+            return;
+        }
+
+        if (this.generatedPresentation.fileBlob) {
+            const url = URL.createObjectURL(this.generatedPresentation.fileBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${this.generatedPresentation.presentationId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            return;
+        }
+
+        alert('Файл недоступен для скачивания');
     }
 
     open() {
@@ -924,3 +1121,4 @@ class AiVitrina {
 if (typeof window !== 'undefined') {
     window.AiVitrina = AiVitrina;
 }
+

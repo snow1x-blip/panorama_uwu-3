@@ -133,7 +133,7 @@
         try {
             console.log('Отправка POST запроса на /process');
             
-            const response = await fetch('http://localhost:8000/process', {
+            const response = await fetch('/process', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -222,11 +222,13 @@
             photoPlaceholders.forEach((placeholder, index) => {
                 if (data.images[index]) {
                     let imagePath = data.images[index];
-                    if (imagePath.startsWith('static/')) {
+                    if (imagePath.startsWith('/static/')) {
+                        imagePath = imagePath.substring(8);
+                    } else if (imagePath.startsWith('static/')) {
                         imagePath = imagePath.substring(7);
                     }
-                    
-                    const imageUrl = 'esoft_front/static/' + imagePath;
+
+                    const imageUrl = '/esoft_front/static/' + imagePath;
                     console.log(`Загрузка фото ${index + 1}:`, imageUrl);
                     
                     const img = document.createElement('img');
@@ -311,7 +313,7 @@
         }
         
         try {
-            const response = await fetch('http://localhost:8000/ai_gen/presa/', {
+            const response = await fetch('/ai_gen/presa', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -402,7 +404,7 @@
         console.log(' Выполняем авторизацию в сервисе генерации...');
         
         try {
-            const response = await fetch('http://81.26.189.36:5001/api/v1/auth/login/', {
+            const response = await fetch('/api/v1/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -553,7 +555,7 @@
         
         try {
             // Шаг 1: Генерация презентации
-            const response = await fetch('http://81.26.189.36:5001/api/v1/ppt/presentation/generate/', {
+            const response = await fetch('/api/v1/ppt/presentation/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -598,7 +600,7 @@
             const formData = new FormData();
             formData.append('file', blob, fileName);
             
-            const uploadResponse = await fetch(`http://localhost:8000/upload/pdf/${encodeURIComponent(fileName)}`, {
+            const uploadResponse = await fetch(`/upload/pdf/${encodeURIComponent(fileName)}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${typeof getToken === 'function' ? getToken() : localStorage.getItem('access_token')}`
@@ -625,9 +627,9 @@
                 const downloadBtn = document.getElementById('downloadPdfBtn');
                 if (downloadBtn) {
                     // Если путь относительный - добавляем базовый URL бекенда
-                    const downloadUrl = filePath.startsWith('http') 
+                    const downloadUrl = filePath.startsWith('https') 
                         ? filePath 
-                        : `http://localhost:8000${filePath.startsWith('/') ? '' : '/'}${filePath}`;
+                        : `${filePath.startsWith('/') ? '' : '/'}${filePath}`;
                     
                     downloadBtn.href = downloadUrl;
                     downloadBtn.download = fileName;
