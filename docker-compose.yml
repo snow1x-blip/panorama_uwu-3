@@ -1,15 +1,16 @@
 services:
-  app:
-    build: .
+  panorama_grani_app:
+    build: 
+      context: ./prod/panorama_grani
     container_name: panorama_grani
     restart: unless-stopped
-    env_file: .env
+    env_file: ./prod/panorama_grani/.env
     ports:
       - "127.0.0.1:8001:8000"
     volumes:
-      - app_data:/app/data
-      - ./parser/json:/app/parser/json
-      - ./esoft_front/static/img:/app/esoft_front/static/img
+      - app_data_grani:/app/data
+      - ./prod/panorama_grani/parser/json:/app/parser/json
+      - ./prod/panorama_grani/esoft_front/static/img:/app/esoft_front/static/img
     environment:
       - DATABASE_URL=sqlite:///./data/users.db
 
@@ -20,7 +21,23 @@ services:
     ports:
       - "0.0.0.0:5001:80"
     volumes:
-      - ./prod/presenton/app_data/exports:/app_data/exports
+      - ./prod/panorama_grani/prod/presenton/app_data/exports:/app_data/exports
+
+  panorama_uwu_app:
+    build:
+      context: ./prod/panorama_uwu-3
+    container_name: panorama_uwu-3
+    restart: unless-stopped
+    env_file: ./prod/panorama_uwu-3/.env
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - app_data_uwu:/app/data
+      - ./prod/panorama_uwu-3/parser/json:/app/parser/json
+      - ./prod/panorama_uwu-3/esoft_front/static/img:/app/esoft_front/static/img
+    environment:
+      - DATABASE_URL=sqlite:///./data/users.db
 
 volumes:
-  app_data:
+  app_data_grani:
+  app_data_uwu:
