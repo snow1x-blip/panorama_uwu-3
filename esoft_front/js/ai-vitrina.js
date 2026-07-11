@@ -984,7 +984,7 @@ class AiVitrina {
     }
 
     downloadGeneratedFile(filePath, token, presentationId) {
-        const fileUrl = `~/prod/presenton${presentationId}`;
+        const fileUrl = `prod/presenton${presentationId}`;
 
         return fetch(fileUrl, {
             method: 'GET',
