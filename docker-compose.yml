@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -20,11 +18,10 @@ services:
     container_name: presenton
     restart: unless-stopped
     ports:
-      - "5001:80"
+      - "0.0.0.0:5001:80"
     volumes:
-      - presenton_data:/app_data
+      - ./prod/presenton/app_data/exports:/app_data/exports
 
 volumes:
   app_data:
-  presenton_data:
 
