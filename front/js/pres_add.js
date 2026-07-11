@@ -311,7 +311,7 @@
         }
         
         try {
-            const response = await fetch('http://localhost:8000/ai_gen/presa/', {
+            const response = await fetch('https://graniai.server72.ru/ai_gen/presa/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -599,7 +599,7 @@
             const formData = new FormData();
             formData.append('file', blob, fileName);
             
-            const uploadResponse = await fetch(`http://localhost:8000/upload/pdf/${encodeURIComponent(fileName)}`, {
+            const uploadResponse = await fetch(`https://graniai.server72.ru/upload/pdf/${encodeURIComponent(fileName)}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${typeof getToken === 'function' ? getToken() : localStorage.getItem('access_token')}`
@@ -628,7 +628,7 @@
                     // Если путь относительный - добавляем базовый URL бекенда
                     const downloadUrl = filePath.startsWith('http') 
                         ? filePath 
-                        : `http://localhost:8000${filePath.startsWith('/') ? '' : '/'}${filePath}`;
+                        : `https://graniai.server72.ru${filePath.startsWith('/') ? '' : '/'}${filePath}`;
                     
                     downloadBtn.href = downloadUrl;
                     downloadBtn.download = fileName;
