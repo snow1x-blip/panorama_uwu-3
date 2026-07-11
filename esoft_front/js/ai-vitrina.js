@@ -848,8 +848,8 @@ class AiVitrina {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                username: 'snow1x',
-                password: 'scoray_y1t'
+                username: 'neutrino',
+                password: 'G7L2J3P726a/'
             })
         })
             .then(async response => {
