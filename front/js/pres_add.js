@@ -626,7 +626,7 @@
                 const downloadBtn = document.getElementById('downloadPdfBtn');
                 if (downloadBtn) {
                     // Если путь относительный - добавляем базовый URL бекенда
-                    const downloadUrl = filePath.startsWith('http') 
+                    const downloadUrl = filePath.startsWith('https') 
                         ? filePath 
                         : `https://graniai.server72.ru${filePath.startsWith('/') ? '' : '/'}${filePath}`;
                     
