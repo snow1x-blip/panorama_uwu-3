@@ -133,7 +133,7 @@
         try {
             console.log('Отправка POST запроса на /process');
             
-            const response = await fetch('https://graniai.server72.ru/process', {
+            const response = await fetch('/process', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -311,7 +311,7 @@
         }
         
         try {
-            const response = await fetch('https://graniai.server72.ru/ai_gen/presa/', {
+            const response = await fetch('/ai_gen/presa/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -403,7 +403,7 @@
         console.log(' Выполняем авторизацию в сервисе генерации...');
         
         try {
-            const response = await fetch('https://graniai.server72.ru/api/v1/auth/login/', {
+            const response = await fetch('/api/v1/auth/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -554,7 +554,7 @@
         
         try {
             // Шаг 1: Генерация презентации
-            const response = await fetch('https://graniai.server72.ru:5001/api/v1/ppt/presentation/generate/', {
+            const response = await fetch('/api/v1/ppt/presentation/generate/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -599,7 +599,7 @@
             const formData = new FormData();
             formData.append('file', blob, fileName);
             
-            const uploadResponse = await fetch(`https://graniai.server72.ru/upload/pdf/${encodeURIComponent(fileName)}`, {
+            const uploadResponse = await fetch(`/upload/pdf/${encodeURIComponent(fileName)}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${typeof getToken === 'function' ? getToken() : localStorage.getItem('access_token')}`
@@ -628,7 +628,7 @@
                     // Если путь относительный - добавляем базовый URL бекенда
                     const downloadUrl = filePath.startsWith('https') 
                         ? filePath 
-                        : `https://graniai.server72.ru${filePath.startsWith('/') ? '' : '/'}${filePath}`;
+                        : `${filePath.startsWith('/') ? '' : '/'}${filePath}`;
                     
                     downloadBtn.href = downloadUrl;
                     downloadBtn.download = fileName;
