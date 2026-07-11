@@ -587,7 +587,7 @@
 
             // Шаг 2: Скачивание через export-presentation
             const title = currentPropertyData?.title || 'presentation';
-            const exportUrl = `http://127.0.0.1:5001/api/export-presentation/file?name=${presentationNmae}`;
+            const exportUrl = `http://81.26.189.36:5001/api/export-presentation/file?name=${presentationNmae}`;
 
             console.log('⬇️ Скачивание презентации:', exportUrl);
 
