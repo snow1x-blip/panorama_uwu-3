@@ -51,7 +51,7 @@ sudo docker start presenton
 - [x] Запумтить в прод
 - [x] ...
 
-## Команда проекта
+## Как с нами связаться:
 
-- [Фомин Тимофей](tg://resolve?domain=bzvyagintsev) — Tech-lid/Full-stack
-- [Чехов Павел](tg://resolve?domain=bzvyagintsev) — Back-end/DevOps
+- [Фомин Тимофей](https://t.me/neutrinoooooo) — Tech-lid/Full-stack
+- [Чехов Павел](https://t.me/snow1xx) — Back-end/DevOps
