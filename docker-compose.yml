@@ -39,10 +39,5 @@ services:
       - DATABASE_URL=sqlite:///./data/users.db
 
 volumes:
-<<<<<<< HEAD
-  app_data_grani:
-  app_data_uwu:
-=======
   app_data:
 
->>>>>>> 4b9ab52c2bd301021ce7a83147e8f322152982e1
